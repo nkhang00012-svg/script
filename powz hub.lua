@@ -38,13 +38,69 @@ mainCorner.Parent = mainFrame
 -- Tiêu đề POWZ HUB TOYMODS
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
-titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.Size = UDim2.new(1, -40, 0, 40)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "POWZ HUB TOYMODS"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextSize = 14
 titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = mainFrame
+
+-- Nút Thu Nhỏ (-)
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Name = "MinimizeButton"
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -35, 0, 5)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minimizeBtn.BorderSizePixel = 0
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.TextSize = 18
+minimizeBtn.Font = Enum.Font.SourceSansBold
+minimizeBtn.AutoButtonColor = false
+minimizeBtn.Parent = mainFrame
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(1, 0) -- Bo tròn thành hình tròn
+minCorner.Parent = minimizeBtn
+
+-- Tạo Cục Tròn (Floating Ball) để mở lại UI khi thu nhỏ
+local floatBtn = Instance.new("TextButton")
+floatBtn.Name = "FloatButton"
+floatBtn.Size = UDim2.new(0, 50, 0, 50)
+floatBtn.Position = UDim2.new(0.85, 0, 0.5, -25)
+floatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+floatBtn.BorderSizePixel = 0
+floatBtn.Text = "POWZ"
+floatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+floatBtn.TextSize = 11
+floatBtn.Font = Enum.Font.SourceSansBold
+floatBtn.Visible = false
+floatBtn.Active = true
+floatBtn.Draggable = true -- Có thể di chuyển cục tròn
+floatBtn.Parent = screenGui
+
+local floatCorner = Instance.new("UICorner")
+floatCorner.CornerRadius = UDim.new(1, 0)
+floatCorner.Parent = floatBtn
+
+local floatStroke = Instance.new("UIStroke")
+floatStroke.Color = Color3.fromRGB(80, 80, 80)
+floatStroke.Thickness = 2
+floatStroke.Parent = floatBtn
+
+-- Sự kiện thu nhỏ / mở rộng UI
+minimizeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    floatBtn.Visible = true
+end)
+
+floatBtn.MouseButton1Click:Connect(function()
+    floatBtn.Visible = false
+    mainFrame.Visible = true
+end)
 
 -- Khung cuộn chứa nội dung (ScrollingFrame)
 local scrollFrame = Instance.new("ScrollingFrame")
