@@ -1,12 +1,171 @@
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Xoá UI cũ nếu đã tồn tại
-local targetParent = gethui and gethui() or CoreGui
-if targetParent:FindFirstChild("POWZ_HUB_TOYMODS") then
-    targetParent:FindFirstChild("POWZ_HUB_TOYMODS"):Destroy()
+-- 0. DỌN SẠCH SẼ TẤT CẢ CÁC UI CŨ ĐÃ TỒN TẠI TRƯỚC ĐÓ
+local function cleanupOldUIs()
+    pcall(function()
+        local targetParent = (gethui and gethui()) or CoreGui
+        for _, child in ipairs(targetParent:GetChildren()) do
+            if child.Name == "POWZ_HUB_TOYMODS" or child.Name == "InfiniteRotatingCrosshair" then
+                child:Destroy()
+            end
+        end
+        for _, child in ipairs(PlayerGui:GetChildren()) do
+            if child.Name == "POWZ_HUB_TOYMODS" or child.Name == "InfiniteRotatingCrosshair" then
+                child:Destroy()
+            end
+        end
+    end)
+end
+cleanupOldUIs()
+
+
+-- ==========================================
+-- PHẦN 1: TÂM CROSSHAIR XOAY VĨNH VIỄN
+-- ==========================================
+local CROSSHAIR_DECAL_ID = "90099090341547"
+local CROSSHAIR_SIZE = 47
+local CROSSHAIR_ROTATION_SPEED = 200
+
+task.spawn(function()
+    while true do
+        pcall(function()
+            local oldGui = PlayerGui:FindFirstChild("Crosshairs")
+            if oldGui and oldGui.Enabled then
+                oldGui.Enabled = false
+            end
+        end)
+        task.wait(1)
+    end
+end)
+
+local targetParent = (gethui and gethui()) or CoreGui
+local CrosshairScreenGui = Instance.new("ScreenGui")
+CrosshairScreenGui.Name = "InfiniteRotatingCrosshair"
+CrosshairScreenGui.IgnoreGuiInset = true
+CrosshairScreenGui.ResetOnSpawn = false
+CrosshairScreenGui.Parent = targetParent
+
+local Crosshair = Instance.new("ImageLabel")
+Crosshair.Parent = CrosshairScreenGui
+Crosshair.AnchorPoint = Vector2.new(0.5, 0.5)
+Crosshair.Position = UDim2.new(0.5, 0, 0.5, 0)
+Crosshair.Size = UDim2.new(0, CROSSHAIR_SIZE, 0, CROSSHAIR_SIZE)
+Crosshair.BackgroundTransparency = 1
+Crosshair.Image = "rbxassetid://" .. tostring(CROSSHAIR_DECAL_ID)
+Crosshair.ScaleType = Enum.ScaleType.Fit
+
+local crosshairRotation = 0
+RunService.RenderStepped:Connect(function(dt)
+    if Crosshair and Crosshair.Parent then
+        crosshairRotation = (crosshairRotation + CROSSHAIR_ROTATION_SPEED * dt) % 360
+        Crosshair.Rotation = crosshairRotation
+    end
+end)
+
+
+-- ==========================================
+-- PHẦN 2: MOD GIAO DIỆN COINS & VIỀN LED CẦU VỒNG
+-- ==========================================
+local OLD_DECAL_ID = "8659337867"
+local NEW_DECAL_ID = "90034667735355"
+local COIN_ROTATION_SPEED = 200
+
+local function applyCoinModifications()
+    for _, obj in ipairs(PlayerGui:GetDescendants()) do
+        if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+            local currentImage = tostring(obj.Image)
+            if string.find(currentImage, OLD_DECAL_ID) or obj.Name == "CoinImage" then
+                obj.BackgroundTransparency = 1
+                obj.ScaleType = Enum.ScaleType.Fit
+                obj.Image = "rbxassetid://" .. tostring(NEW_DECAL_ID)
+
+                if not obj:GetAttribute("IsRotating") then
+                    obj:SetAttribute("IsRotating", true)
+                    local currentCoinRot = 0
+                    RunService.RenderStepped:Connect(function(dt)
+                        if obj and obj.Parent then
+                            currentCoinRot = (currentCoinRot + COIN_ROTATION_SPEED * dt) % 360
+                            obj.Rotation = currentCoinRot
+                        end
+                    end)
+                end
+            end
+        end
+
+        if obj.Name == "CoinsFrame" and obj:IsA("GuiObject") then
+            local stroke = obj:FindFirstChild("RainbowStroke")
+            if not stroke then
+                stroke = Instance.new("UIStroke")
+                stroke.Name = "RainbowStroke"
+                stroke.Thickness = 3.5
+                stroke.Parent = obj
+            end
+
+            local gradient = stroke:FindFirstChild("RainbowGradient")
+            if not gradient then
+                gradient = Instance.new("UIGradient")
+                gradient.Name = "RainbowGradient"
+                gradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+                    ColorSequenceKeypoint.new(0.20, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 255, 0)),
+                    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 0, 255)),
+                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+                })
+                gradient.Parent = stroke
+            end
+        end
+
+        if (obj.Name == "Blank" or obj.Name == "Coins") and obj:IsA("TextLabel") then
+            obj.TextColor3 = Color3.fromRGB(255, 255, 255)
+            if not obj:FindFirstChild("TextBlackStroke") then
+                local tStroke = Instance.new("UIStroke")
+                tStroke.Name = "TextBlackStroke"
+                tStroke.Thickness = 2
+                tStroke.Color = Color3.fromRGB(0, 0, 0)
+                tStroke.Parent = obj
+            end
+        end
+    end
 end
 
+local ledOffset = 0
+RunService.RenderStepped:Connect(function(dt)
+    ledOffset = (ledOffset + dt * 0.6) % 1
+
+    pcall(function()
+        for _, obj in ipairs(PlayerGui:GetDescendants()) do
+            if obj.Name == "CoinsFrame" then
+                local stroke = obj:FindFirstChild("RainbowStroke")
+                if stroke then
+                    local gradient = stroke:FindFirstChild("RainbowGradient")
+                    if gradient then
+                        gradient.Offset = Vector2.new(ledOffset, 0)
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+applyCoinModifications()
+task.spawn(function()
+    while true do
+        task.wait(1)
+        pcall(applyCoinModifications)
+    end
+end)
+
+
+-- ==========================================
+-- PHẦN 3: GIAO DIỆN CHÍNH POWZ HUB TOYMODS (GIỮ NGUYÊN GỐC)
+-- ==========================================
 -- Tạo ScreenGui mới
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "POWZ_HUB_TOYMODS"
@@ -91,15 +250,46 @@ floatStroke.Color = Color3.fromRGB(80, 80, 80)
 floatStroke.Thickness = 2
 floatStroke.Parent = floatBtn
 
--- Sự kiện thu nhỏ / mở rộng UI
+-- ==================== ANIMATION THU NHỎ / MỞ RỘNG UI ====================
+local animTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
 minimizeBtn.MouseButton1Click:Connect(function()
+    -- Animation thu nhỏ MainFrame dần về 0 rồi ẩn đi
+    local shrinkTween = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = mainFrame.Position + UDim2.new(0, 100, 0, 150)
+    })
+    shrinkTween:Play()
+    shrinkTween.Completed:Wait()
     mainFrame.Visible = false
+    -- Reset lại Size chuẩn cho lần mở sau
+    mainFrame.Size = UDim2.new(0, 200, 0, 300)
+    mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
+
+    -- Hiển thị cục tròn với hiệu ứng phóng to
+    floatBtn.Size = UDim2.new(0, 0, 0, 0)
     floatBtn.Visible = true
+    TweenService:Create(floatBtn, animTweenInfo, {Size = UDim2.new(0, 50, 0, 50)}):Play()
 end)
 
 floatBtn.MouseButton1Click:Connect(function()
+    -- Animation phóng to cục tròn rồi ẩn đi
+    local popTween = TweenService:Create(floatBtn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 0, 0, 0)
+    })
+    popTween:Play()
+    popTween.Completed:Wait()
     floatBtn.Visible = false
+    floatBtn.Size = UDim2.new(0, 50, 0, 50) -- Reset size cục tròn
+
+    -- Hiển thị MainFrame với hiệu ứng bung mượt mà từ giữa
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.Visible = true
+    TweenService:Create(mainFrame, animTweenInfo, {
+        Size = UDim2.new(0, 200, 0, 300),
+        Position = UDim2.new(0.5, -100, 0.5, -150)
+    }):Play()
 end)
 
 -- Khung cuộn chứa nội dung (ScrollingFrame)
@@ -205,20 +395,16 @@ end
 -- 1. MỤC MAIN
 createCategoryHeader("MAIN", 1)
 
--- Ô: Powz Control
 createButton("powz control", 2, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/bonbonaimbot/refs/heads/main/powzcontrol.lua"))()
 end)
 
--- Ô: Fpv drone (free)
 createButton("Fpv drone (free)", 3, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/bonbonhub/refs/heads/main/fpvdrone.lua"))()
 end)
 
--- Ghi chú cho Fpv drone (free)
 createSubNote("nếu muốn fpv drone vip hãy xin owner ;)", 4)
 
--- Ô: Powz FTAP Script (Free Plan & No VIP)
 createButton("powz ftap script ( free plan & no vip)", 5, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/powz.lua"))()
 end)
@@ -226,7 +412,6 @@ end)
 -- 2. MỤC MISC
 createCategoryHeader("MISC", 6)
 
--- Ô: FOV 120
 createButton("fov 120", 7, function()
     local workspace = game:GetService("Workspace")
     local camera = workspace.CurrentCamera
@@ -242,16 +427,35 @@ createButton("fov 120", 7, function()
     end)
 end)
 
--- Ô: Góc nhìn thứ 3
 createButton("góc nhìn thứ 3", 8, function()
     local player = game:GetService("Players").LocalPlayer
     if player then
         player.CameraMaxZoomDistance = 99999
+        player.CameraMinZoomDistance = 0.5
         player.CameraMode = Enum.CameraMode.Classic
+        
+        task.spawn(function()
+            while task.wait(0.5) do
+                local character = player.Character
+                if character then
+                    for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.LocalTransparencyModifier = 0
+                        end
+                    end
+                end
+            end
+        end)
     end
 end)
 
--- Ô: Aimbot
 createButton("aimbot", 9, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/bonbonhub/refs/heads/main/rageaimbot.lua"))()
+end)
+
+-- 3. MỤC VISUAL
+createCategoryHeader("VISUAL", 10)
+
+createButton("Helicopter", 11, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/gemini-code-1792870828601.lua"))()
 end)
