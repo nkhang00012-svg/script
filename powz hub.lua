@@ -2,10 +2,65 @@ local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- 0. DỌN SẠCH SẼ TẤT CẢ CÁC UI CŨ ĐÃ TỒN TẠI TRƯỚC ĐÓ
+-- ==========================================
+-- NHẮM VÀO SPAWNLOCATION: ĐỔI DECAL, ẨN NỀN & XOAY TẠI CHỖ
+-- ==========================================
+task.spawn(function()
+    pcall(function()
+        local spawnLocation = Workspace:FindFirstChildOfClass("SpawnLocation")
+
+        if not spawnLocation then
+            for _, desc in ipairs(Workspace:GetDescendants()) do
+                if desc:IsA("SpawnLocation") then
+                    spawnLocation = desc
+                    break
+                end
+            end
+        end
+
+        if spawnLocation then
+            -- Cố định vật thể để game không kéo đi
+            spawnLocation.Anchored = true
+            -- Ẩn nền SpawnLocation (Transparency = 1)
+            spawnLocation.Transparency = 1
+
+            -- Tìm hoặc tạo Decal bên trong SpawnLocation
+            local targetDecal = spawnLocation:FindFirstChildOfClass("Decal")
+            if not targetDecal then
+                targetDecal = Instance.new("Decal")
+                targetDecal.Parent = spawnLocation
+            end
+            
+            -- Gán ID decal & giữ hiện rõ nét (Transparency = 0)
+            targetDecal.Texture = "rbxassetid://130631112307885"
+            targetDecal.Transparency = 0
+            
+            -- Xoay SpawnLocation tại chỗ chuẩn xác
+            local rotationSpeed = 20 -- Tốc độ xoay (độ/giây)
+            local currentAngle = 0
+            
+            RunService.Heartbeat:Connect(function(dt)
+                if spawnLocation and spawnLocation.Parent then
+                    currentAngle = (currentAngle + rotationSpeed * dt) % 360
+                    spawnLocation.CFrame = CFrame.new(spawnLocation.Position) * CFrame.Angles(0, math.rad(currentAngle), 0)
+                end
+            end)
+            
+            print("Đã tìm thấy SpawnLocation và kích hoạt xoay thành công!")
+        else
+            warn("Không tìm thấy SpawnLocation nào trong Workspace!")
+        end
+    end)
+end)
+
+-- ==========================================
+-- DỌN SẠCH SẼ TẤT CẢ CÁC UI CŨ ĐÃ TỒN TẠI TRƯỚC ĐÓ
+-- ==========================================
 local function cleanupOldUIs()
     pcall(function()
         local targetParent = (gethui and gethui()) or CoreGui
@@ -69,7 +124,7 @@ end)
 
 
 -- ==========================================
--- PHẦN 2: MOD GIAO DIỆN COINS & VIỀN LED CẦU VỒNG
+-- PHẦN 2: MOD GIAO DIỆN COINS (ĐÃ GỠ BỎ VIỀN LED RGB ĐỂ GIẢM LAG)
 -- ==========================================
 local OLD_DECAL_ID = "8659337867"
 local NEW_DECAL_ID = "90034667735355"
@@ -97,31 +152,7 @@ local function applyCoinModifications()
             end
         end
 
-        if obj.Name == "CoinsFrame" and obj:IsA("GuiObject") then
-            local stroke = obj:FindFirstChild("RainbowStroke")
-            if not stroke then
-                stroke = Instance.new("UIStroke")
-                stroke.Name = "RainbowStroke"
-                stroke.Thickness = 3.5
-                stroke.Parent = obj
-            end
-
-            local gradient = stroke:FindFirstChild("RainbowGradient")
-            if not gradient then
-                gradient = Instance.new("UIGradient")
-                gradient.Name = "RainbowGradient"
-                gradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
-                    ColorSequenceKeypoint.new(0.20, Color3.fromRGB(255, 255, 0)),
-                    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 255, 0)),
-                    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)),
-                    ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 0, 255)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
-                })
-                gradient.Parent = stroke
-            end
-        end
-
+        -- Giữ lại màu chữ và viền đen cơ bản cho text coins (nếu có)
         if (obj.Name == "Blank" or obj.Name == "Coins") and obj:IsA("TextLabel") then
             obj.TextColor3 = Color3.fromRGB(255, 255, 255)
             if not obj:FindFirstChild("TextBlackStroke") then
@@ -135,25 +166,6 @@ local function applyCoinModifications()
     end
 end
 
-local ledOffset = 0
-RunService.RenderStepped:Connect(function(dt)
-    ledOffset = (ledOffset + dt * 0.6) % 1
-
-    pcall(function()
-        for _, obj in ipairs(PlayerGui:GetDescendants()) do
-            if obj.Name == "CoinsFrame" then
-                local stroke = obj:FindFirstChild("RainbowStroke")
-                if stroke then
-                    local gradient = stroke:FindFirstChild("RainbowGradient")
-                    if gradient then
-                        gradient.Offset = Vector2.new(ledOffset, 0)
-                    end
-                end
-            end
-        end
-    end)
-end)
-
 applyCoinModifications()
 task.spawn(function()
     while true do
@@ -164,14 +176,12 @@ end)
 
 
 -- ==========================================
--- PHẦN 3: GIAO DIỆN CHÍNH POWZ HUB TOYMODS (GIỮ NGUYÊN GỐC)
+-- PHẦN 3: GIAO DIỆN CHÍNH POWZ HUB TOYMODS
 -- ==========================================
--- Tạo ScreenGui mới
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "POWZ_HUB_TOYMODS"
 screenGui.ResetOnSpawn = false
 
--- Đưa UI vào CoreGui hoặc gethui
 if syn and syn.protect_gui then
     syn.protect_gui(screenGui)
     screenGui.Parent = CoreGui
@@ -179,7 +189,6 @@ else
     screenGui.Parent = targetParent
 end
 
--- Khung chính (200 x 300)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 200, 0, 300)
@@ -194,7 +203,6 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 12)
 mainCorner.Parent = mainFrame
 
--- Tiêu đề POWZ HUB TOYMODS
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
 titleLabel.Size = UDim2.new(1, -40, 0, 40)
@@ -207,7 +215,6 @@ titleLabel.Font = Enum.Font.SourceSansBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = mainFrame
 
--- Nút Thu Nhỏ (-)
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Name = "MinimizeButton"
 minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -222,10 +229,9 @@ minimizeBtn.AutoButtonColor = false
 minimizeBtn.Parent = mainFrame
 
 local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(1, 0) -- Bo tròn thành hình tròn
+minCorner.CornerRadius = UDim.new(1, 0)
 minCorner.Parent = minimizeBtn
 
--- Tạo Cục Tròn (Floating Ball) để mở lại UI khi thu nhỏ
 local floatBtn = Instance.new("TextButton")
 floatBtn.Name = "FloatButton"
 floatBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -238,7 +244,7 @@ floatBtn.TextSize = 11
 floatBtn.Font = Enum.Font.SourceSansBold
 floatBtn.Visible = false
 floatBtn.Active = true
-floatBtn.Draggable = true -- Có thể di chuyển cục tròn
+floatBtn.Draggable = true
 floatBtn.Parent = screenGui
 
 local floatCorner = Instance.new("UICorner")
@@ -254,7 +260,6 @@ floatStroke.Parent = floatBtn
 local animTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 minimizeBtn.MouseButton1Click:Connect(function()
-    -- Animation thu nhỏ MainFrame dần về 0 rồi ẩn đi
     local shrinkTween = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Size = UDim2.new(0, 0, 0, 0),
         Position = mainFrame.Position + UDim2.new(0, 100, 0, 150)
@@ -262,27 +267,23 @@ minimizeBtn.MouseButton1Click:Connect(function()
     shrinkTween:Play()
     shrinkTween.Completed:Wait()
     mainFrame.Visible = false
-    -- Reset lại Size chuẩn cho lần mở sau
     mainFrame.Size = UDim2.new(0, 200, 0, 300)
     mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
 
-    -- Hiển thị cục tròn với hiệu ứng phóng to
     floatBtn.Size = UDim2.new(0, 0, 0, 0)
     floatBtn.Visible = true
     TweenService:Create(floatBtn, animTweenInfo, {Size = UDim2.new(0, 50, 0, 50)}):Play()
 end)
 
 floatBtn.MouseButton1Click:Connect(function()
-    -- Animation phóng to cục tròn rồi ẩn đi
     local popTween = TweenService:Create(floatBtn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Size = UDim2.new(0, 0, 0, 0)
     })
     popTween:Play()
     popTween.Completed:Wait()
     floatBtn.Visible = false
-    floatBtn.Size = UDim2.new(0, 50, 0, 50) -- Reset size cục tròn
+    floatBtn.Size = UDim2.new(0, 50, 0, 50)
 
-    -- Hiển thị MainFrame với hiệu ứng bung mượt mà từ giữa
     mainFrame.Size = UDim2.new(0, 0, 0, 0)
     mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.Visible = true
@@ -292,7 +293,6 @@ floatBtn.MouseButton1Click:Connect(function()
     }):Play()
 end)
 
--- Khung cuộn chứa nội dung (ScrollingFrame)
 local scrollFrame = Instance.new("ScrollingFrame")
 scrollFrame.Name = "ScrollFrame"
 scrollFrame.Size = UDim2.new(1, -12, 1, -45)
@@ -310,12 +310,10 @@ listLayout.Padding = UDim.new(0, 8)
 listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 listLayout.Parent = scrollFrame
 
--- Cập nhật kích thước cuộn tự động
 listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     scrollFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- Hàm tạo tiêu đề phân cách
 local function createCategoryHeader(name, order)
     local header = Instance.new("TextLabel")
     header.Name = "Header_" .. name
@@ -329,7 +327,6 @@ local function createCategoryHeader(name, order)
     header.Parent = scrollFrame
 end
 
--- Hàm tạo Nút bấm bo góc + Animation
 local function createButton(btnText, order, onClickCallback)
     local btn = Instance.new("TextButton")
     btn.Name = btnText .. "Btn"
@@ -349,7 +346,6 @@ local function createButton(btnText, order, onClickCallback)
     btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = btn
 
-    -- Hiệu ứng Hover / Click
     local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local normalColor = Color3.fromRGB(50, 50, 50)
     local hoverColor = Color3.fromRGB(75, 75, 75)
@@ -375,7 +371,6 @@ local function createButton(btnText, order, onClickCallback)
     return btn
 end
 
--- Hàm tạo Ghi chú nhỏ bên dưới nút
 local function createSubNote(noteText, order)
     local note = Instance.new("TextLabel")
     note.Name = "NoteLabel"
@@ -392,7 +387,6 @@ end
 
 -- ==================== CẤU TRÚC DANH MỤC ====================
 
--- 1. MỤC MAIN
 createCategoryHeader("MAIN", 1)
 
 createButton("powz control", 2, function()
@@ -409,7 +403,6 @@ createButton("powz ftap script ( free plan & no vip)", 5, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/powz.lua"))()
 end)
 
--- 2. MỤC MISC
 createCategoryHeader("MISC", 6)
 
 createButton("fov 120", 7, function()
@@ -433,17 +426,20 @@ createButton("góc nhìn thứ 3", 8, function()
         player.CameraMaxZoomDistance = 99999
         player.CameraMinZoomDistance = 0.5
         player.CameraMode = Enum.CameraMode.Classic
-        
+         
         task.spawn(function()
-            while task.wait(0.5) do
-                local character = player.Character
-                if character then
-                    for _, part in ipairs(character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.LocalTransparencyModifier = 0
+            while true do
+                pcall(function()
+                    local character = player.Character
+                    if character then
+                        for _, part in ipairs(character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.LocalTransparencyModifier = 0
+                            end
                         end
                     end
-                end
+                end)
+                task.wait(1)
             end
         end)
     end
@@ -453,9 +449,12 @@ createButton("aimbot", 9, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/bonbonhub/refs/heads/main/rageaimbot.lua"))()
 end)
 
--- 3. MỤC VISUAL
 createCategoryHeader("VISUAL", 10)
 
 createButton("Helicopter", 11, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/gemini-code-1792870828601.lua"))()
+end)
+
+createButton("winter sky", 12, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/Script%20%2314.lua"))()
 end)
