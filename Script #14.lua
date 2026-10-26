@@ -1,161 +1,130 @@
--- Tải thư viện UI
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Auto PVP (Remote Event) - Red vs Blue", "DarkTheme")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 
--- Services & LocalPlayer
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+--------------------------------------------------------------------------------
+-- 1. XỬ LÝ SKY & ÁNH SÁNG CHUẨN ROBLOX STUDIO MỚI
+--------------------------------------------------------------------------------
+local function setupCleanWinterLighting()
+	-- Xóa toàn bộ Sky / Atmosphere / Fog cũ trong Lighting
+	for _, child in ipairs(Lighting:GetChildren()) do
+		if child:IsA("Atmosphere") or child:IsA("Fog") or child:IsA("Sky") then
+			child:Destroy()
+		end
+	end
 
--- Cấu hình
-local CONFIG = {
-    Enabled = false,
-    TeleportDistance = 1.5, -- Khoảng cách TP ra sau lưng (studs)
-    CheckInterval = 0.1,    -- Tốc độ cập nhật Teleport
-    FastAttack = true       -- Spam RemoteEvent siêu nhanh
-}
+	-- Tạo đối tượng Sky mới
+	local sky = Instance.new("Sky")
+	sky.Name = "CustomWinterSky"
+	
+	-- Gán đúng định dạng 6 mặt (Sử dụng bộ ID Skybox chuẩn không gian của Roblox)
+	sky.SkyboxBk = "rbxassetid://4495864450"
+	sky.SkyboxDn = "rbxassetid://4495864887"
+	sky.SkyboxFt = "rbxassetid://4495865458"
+	sky.SkyboxLf = "rbxassetid://4495866035"
+	sky.SkyboxRt = "rbxassetid://4495866584"
+	sky.SkyboxUp = "rbxassetid://4495867486"
+	
+	-- Đồng thời gán luôn cho các thuộc tính Content mới (nếu Studio của bạn yêu cầu)
+	pcall(function()
+		sky.SkyboxBackContent = "rbxassetid://4495864450"
+		sky.SkyboxDownContent = "rbxassetid://4495864887"
+		sky.SkyboxFrontContent = "rbxassetid://4495865458"
+		sky.SkyboxLeftContent = "rbxassetid://4495866035"
+		sky.SkyboxRightContent = "rbxassetid://4495866584"
+		sky.SkyboxUpContent = "rbxassetid://4495867486"
+	end)
+	
+	sky.Parent = Lighting
 
-local currentTarget = nil
+	-- Chỉnh ánh sáng tông lạnh trong trẻo
+	Lighting.Ambient = Color3.fromRGB(160, 175, 190)
+	Lighting.OutdoorAmbient = Color3.fromRGB(200, 210, 220)
+	Lighting.ColorShift_Top = Color3.fromRGB(230, 242, 255)
+	Lighting.Brightness = 1.3
+	Lighting.ClockTime = 12
 
--- Tìm RemoteEvent Sword trong ReplicatedStorage -> Combat -> Sword
-local function getSwordRemote()
-    local combatFolder = ReplicatedStorage:FindFirstChild("Combat")
-    if combatFolder then
-        return combatFolder:FindFirstChild("Sword")
-    end
-    return nil
+	Lighting.FogEnd = 100000 
+	Lighting.FogStart = 0
+	
+	-- Chống game tự ý chèn Sky khác vào
+	Lighting.ChildAdded:Connect(function(child)
+		if child:IsA("Sky") and child ~= sky then
+			child:Destroy()
+		end
+	end)
 end
 
-local swordRemote = getSwordRemote()
-
--- Hàm nhận diện team đối địch (Bỏ qua team Out)
-local function getEnemyTeamName()
-    local myTeam = LocalPlayer.Team
-    if not myTeam then return nil end
-    
-    local teamName = myTeam.Name:lower()
-    if teamName:find("red") then
-        return "blue"
-    elseif teamName:find("blue") then
-        return "red"
-    end
-    return nil -- Đang ở team Out hoặc Neutral
+--------------------------------------------------------------------------------
+-- 2. HÀM LỌC PART (GIỮ NGUYÊN CODE CỦA BẠN)
+--------------------------------------------------------------------------------
+local function shouldProcessPart(part)
+	if not part:IsA("BasePart") or part:IsA("Terrain") then 
+		return false 
+	end
+	if not part.Anchored then 
+		return false 
+	end
+	local model = part:FindFirstAncestorOfClass("Model")
+	if model and model:FindFirstChildOfClass("Humanoid") then
+		return false
+	end
+	return true
 end
 
--- Tìm kẻ địch gần nhất thuộc team đối địch
-local function findTarget(enemyColor)
-    local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
-    
-    local myPos = character.HumanoidRootPart.Position
-    local closestPlayer = nil
-    local shortestDistance = math.huge
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Team then
-            local pTeamName = player.Team.Name:lower()
-            if pTeamName:find(enemyColor) and not pTeamName:find("out") then
-                local pChar = player.Character
-                if pChar and pChar:FindFirstChild("HumanoidRootPart") then
-                    local humanoid = pChar:FindFirstChildOfClass("Humanoid")
-                    if humanoid and humanoid.Health > 0 then
-                        local dist = (myPos - pChar.HumanoidRootPart.Position).Magnitude
-                        if dist < shortestDistance then
-                            shortestDistance = dist
-                            closestPlayer = player
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    return closestPlayer
+--------------------------------------------------------------------------------
+-- 3. CHUYỂN ĐỔI MÀU SẮC (XÁM - TRẮNG - ĐEN - XANH BĂNG SIÊU NHẠT)
+--------------------------------------------------------------------------------
+local function applyStrictWinterPalette(part)
+	if not shouldProcessPart(part) then return end
+
+	local color = part.Color
+	local _, _, v = color:ToHSV()
+
+	if v < 0.15 then
+		part.Color = Color3.fromRGB(20, 25, 30)
+	elseif v > 0.75 then
+		part.Color = Color3.fromRGB(245, 248, 252)
+	else
+		local hash = (math.floor(part.Position.X) + math.floor(part.Position.Y) + math.floor(part.Position.Z)) % 2
+		if hash == 1 then
+			part.Color = Color3.fromRGB(215, 230, 245)
+		else
+			local grayVal = math.clamp(math.floor(v * 200), 60, 170)
+			part.Color = Color3.fromRGB(grayVal, grayVal + 5, grayVal + 12)
+		end
+	end
+
+	if part.Material == Enum.Material.Ice or part.Material == Enum.Material.Glass then
+		part.Reflectance = 0.3
+	end
 end
 
--- Hàm cầm Tool 1 nếu cần
-local function equipFirstTool()
-    local character = LocalPlayer.Character
-    local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
-    
-    if not character or not backpack then return end
-    if character:FindFirstChildOfClass("Tool") then return end
-    
-    local firstTool = backpack:FindFirstChildOfClass("Tool")
-    if firstTool then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid:EquipTool(firstTool)
-        end
-    end
+--------------------------------------------------------------------------------
+-- KÍCH HOẠT
+--------------------------------------------------------------------------------
+print("[WinterFilter] Đang khởi chạy hệ thống...")
+
+setupCleanWinterLighting()
+
+local count = 0
+for _, desc in ipairs(Workspace:GetDescendants()) do
+	if desc:IsA("BasePart") then
+		pcall(function()
+			if shouldProcessPart(desc) then
+				applyStrictWinterPalette(desc)
+				count += 1
+			end
+		end)
+	end
 end
 
--- Vòng lặp Teleport ra sau lưng
-task.spawn(function()
-    while true do
-        task.wait(CONFIG.CheckInterval)
-        
-        if CONFIG.Enabled then
-            local enemyColor = getEnemyTeamName()
-            if enemyColor then
-                currentTarget = findTarget(enemyColor)
-                
-                if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("HumanoidRootPart") then
-                    local myChar = LocalPlayer.Character
-                    local targetChar = currentTarget.Character
-                    
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                        local myRoot = myChar.HumanoidRootPart
-                        local targetRoot = targetChar.HumanoidRootPart
-                        
-                        equipFirstTool()
-                        
-                        -- TP ra sau lưng đối thủ
-                        local targetCFrame = targetRoot.CFrame
-                        local backPosition = targetCFrame * CFrame.new(0, 0, CONFIG.TeleportDistance)
-                        myRoot.CFrame = CFrame.new(backPosition.Position, targetRoot.Position)
-                    end
-                end
-            else
-                currentTarget = nil
-            end
-        end
-    end
+Workspace.DescendantAdded:Connect(function(desc)
+	if desc:IsA("BasePart") then
+		task.wait(0.05)
+		pcall(function()
+			applyStrictWinterPalette(desc)
+		end)
+	end
 end)
 
--- Vòng lặp Spam RemoteEvent Đánh Liên Tục (Không Cooldown)
-task.spawn(function()
-    while true do
-        task.wait() -- Chạy theo khung hình (gần như 0s delay)
-        if CONFIG.Enabled and currentTarget then
-            -- Nếu không tìm thấy bằng đường dẫn trực tiếp, thử tìm lại
-            if not swordRemote then
-                swordRemote = getSwordRemote()
-            end
-            
-            if swordRemote then
-                -- Bắn RemoteEvent liên tục lên Server
-                swordRemote:FireServer()
-            end
-        end
-    end
-end)
-
--- Giao diện UI
-local Tab = Window:NewTab("Auto Fast Attack")
-local Section = Tab:NewSection("Remote Event Spam")
-
-Section:NewToggle("Bật Auto TP & Fast Attack", "Spam RemoteEvent Sword không delay", function(state)
-    CONFIG.Enabled = state
-end)
-
-Section:NewSlider("Khoảng cách sau lưng (Studs)", "Khoảng cách đứng sau lưng target", 5, 1, function(s)
-    CONFIG.TeleportDistance = s
-end)
-
-local SettingsTab = Window:NewTab("Cài Đặt")
-local SettingsSection = SettingsTab:NewSection("Giao Diện")
-
-SettingsSection:NewKeybind("Phím Ẩn/Hiện Menu", "Nhấn phím để ẩn/hiện UI", Enum.KeyCode.RightControl, function()
-    Library:ToggleUI()
-end)
+print("[WinterFilter] Hoàn tất! Đã cập nhật Sky chuẩn và đổi màu thành công cho " .. count .. " part.")
