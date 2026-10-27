@@ -458,3 +458,7 @@ end)
 createButton("winter sky", 12, function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/Script%20%2314.lua"))()
 end)
+
+createButton("superman", 13, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nkhang00012-svg/script/refs/heads/main/gemini-code-1793038132791.lua"))()
+end)
