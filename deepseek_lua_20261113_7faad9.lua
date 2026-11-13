@@ -1,14 +1,12 @@
 --!nocheck
 -- ============================================================
--- TIME STOP + LINE LAG SPAM + COUNTDOWN (AUTO RUN ON EXECUTE)
--- Mỗi lần execute → tự chạy combo luôn
--- Y vẫn dùng để chạy lại nếu muốn
+-- TIME STOP + LINE LAG SPAM + COUNTDOWN (ONE-SHOT ON EXECUTE)
+-- Execute → chạy 1 lần → xong tự dừng, không phím, không lặp
 -- ============================================================
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService        = game:GetService("RunService")
-local UserInputService  = game:GetService("UserInputService")
 local TweenService      = game:GetService("TweenService")
 local Lighting          = game:GetService("Lighting")
 local SoundService      = game:GetService("SoundService")
@@ -24,7 +22,6 @@ print("[Combo] Loading...")
 -- ============================================================
 -- CONFIG
 -- ============================================================
-local KEY              = Enum.KeyCode.Y
 local INTRO_SOUND      = "rbxassetid://134121369092456"
 local TICK_SOUND       = "rbxassetid://128707491647978"
 local END_SOUND        = "rbxassetid://97280437833993"
@@ -282,8 +279,6 @@ end
 -- ============================================================
 -- SKILL
 -- ============================================================
-local busy = false
-
 local function castComboInternal()
     local startTime = os.clock()
     StartSpam()
@@ -379,56 +374,32 @@ local function castComboInternal()
     if endSound then endSound:Destroy() end
 end
 
-local function castCombo()
-    if busy then
-        print("[Combo] Đang chạy, bỏ qua")
-        return
-    end
-    busy = true
-    print("[Combo] Bắt đầu cast")
-    local ok, err = pcall(castComboInternal)
-    if not ok then
-        warn("[Combo] LỖI:", err)
-        pcall(unfreezeWorld)
-        pcall(StopSpam)
-        pcall(destroyCC)
-        if countdownLabel then
-            countdownLabel.Visible = false
-            countdownLabel.Text = ""
-        end
-    end
-    busy = false
-    print("[Combo] Kết thúc cast")
-end
-
--- ============================================================
--- KEYBIND (dự phòng, không bắt buộc)
--- ============================================================
-local inputConn = UserInputService.InputBegan:Connect(function(input, gpe)
-    if input.KeyCode == KEY then
-        print("[Combo] Nhận phím Y, gpe =", gpe)
-        task.spawn(castCombo)
-    end
-end)
-
 -- ============================================================
 -- CLEANUP
 -- ============================================================
 env.CombinedCleanup = function()
-    inputConn:Disconnect()
     StopSpam()
     unfreezeWorld()
     if gui then gui:Destroy() end
     destroyCC()
 end
 
-print("[Combo] Loaded. Auto-run sau 0.5s...")
+-- ============================================================
+-- CHẠY 1 LẦN NGAY KHI EXECUTE
+-- ============================================================
+print("[Combo] Loaded. Chạy 1 lần...")
 
--- ============================================================
--- AUTO RUN NGAY KHI EXECUTE
--- ============================================================
-task.spawn(function()
-    task.wait(0.5)   -- đợi GUI + character ổn định
-    print("[Combo] Auto-run!")
-    castCombo()
-end)
+task.wait(0.5)   -- đợi GUI + character ổn định
+print("[Combo] Bắt đầu")
+local ok, err = pcall(castComboInternal)
+if not ok then
+    warn("[Combo] LỖI:", err)
+    pcall(unfreezeWorld)
+    pcall(StopSpam)
+    pcall(destroyCC)
+end
+print("[Combo] Xong.")
+
+-- Tự dọn GUI sau khi hoàn tất
+task.wait(0.2)
+if gui then gui:Destroy() end
