@@ -39953,6 +39953,154 @@ end
 
 		fn21("ToggleToysAura", "Enabled", "Enabled")
 
+		-- ===== Shape "Text": xep toy thanh chu (dot-matrix 5x7) =====
+		local TextShape = { Text = "D", Orientation = "Wall (Vertical)" }
+		do
+			local FONT = {
+				["A"] = { ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" },
+				["B"] = { "####.", "#...#", "#...#", "####.", "#...#", "#...#", "####." },
+				["C"] = { ".###.", "#...#", "#....", "#....", "#....", "#...#", ".###." },
+				["D"] = { "####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####." },
+				["E"] = { "#####", "#....", "#....", "####.", "#....", "#....", "#####" },
+				["F"] = { "#####", "#....", "#....", "####.", "#....", "#....", "#...." },
+				["G"] = { ".###.", "#...#", "#....", "#.###", "#...#", "#...#", ".###." },
+				["H"] = { "#...#", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" },
+				["I"] = { ".###.", "..#..", "..#..", "..#..", "..#..", "..#..", ".###." },
+				["J"] = { "..###", "...#.", "...#.", "...#.", "...#.", "#..#.", ".##.." },
+				["K"] = { "#...#", "#..#.", "#.#..", "##...", "#.#..", "#..#.", "#...#" },
+				["L"] = { "#....", "#....", "#....", "#....", "#....", "#....", "#####" },
+				["M"] = { "#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#" },
+				["N"] = { "#...#", "##..#", "#.#.#", "#..##", "#...#", "#...#", "#...#" },
+				["O"] = { ".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###." },
+				["P"] = { "####.", "#...#", "#...#", "####.", "#....", "#....", "#...." },
+				["Q"] = { ".###.", "#...#", "#...#", "#...#", "#.#.#", "#..#.", ".##.#" },
+				["R"] = { "####.", "#...#", "#...#", "####.", "#.#..", "#..#.", "#...#" },
+				["S"] = { ".####", "#....", "#....", ".###.", "....#", "....#", "####." },
+				["T"] = { "#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.." },
+				["U"] = { "#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###." },
+				["V"] = { "#...#", "#...#", "#...#", "#...#", "#...#", ".#.#.", "..#.." },
+				["W"] = { "#...#", "#...#", "#...#", "#.#.#", "#.#.#", "##.##", "#...#" },
+				["X"] = { "#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#" },
+				["Y"] = { "#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.." },
+				["Z"] = { "#####", "....#", "...#.", "..#..", ".#...", "#....", "#####" },
+				["0"] = { ".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###." },
+				["1"] = { "..#..", ".##..", "..#..", "..#..", "..#..", "..#..", ".###." },
+				["2"] = { ".###.", "#...#", "....#", "...#.", "..#..", ".#...", "#####" },
+				["3"] = { "####.", "....#", "....#", ".###.", "....#", "....#", "####." },
+				["4"] = { "...#.", "..##.", ".#.#.", "#..#.", "#####", "...#.", "...#." },
+				["5"] = { "#####", "#....", "####.", "....#", "....#", "#...#", ".###." },
+				["6"] = { ".###.", "#....", "#....", "####.", "#...#", "#...#", ".###." },
+				["7"] = { "#####", "....#", "...#.", "..#..", ".#...", ".#...", ".#..." },
+				["8"] = { ".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###." },
+				["9"] = { ".###.", "#...#", "#...#", ".####", "....#", "....#", ".###." },
+				["!"] = { "..#..", "..#..", "..#..", "..#..", "..#..", ".....", "..#.." },
+				["."] = { ".....", ".....", ".....", ".....", ".....", ".##..", ".##.." },
+				["-"] = { ".....", ".....", ".....", "#####", ".....", ".....", "....." },
+				["?"] = { ".###.", "#...#", "....#", "...#.", "..#..", ".....", "..#.." },
+				[":"] = { ".....", ".##..", ".##..", ".....", ".##..", ".##..", "....." },
+				["+"] = { ".....", "..#..", "..#..", "#####", "..#..", "..#..", "....." },
+				[" "] = { ".....", ".....", ".....", ".....", ".....", ".....", "....." },
+			}
+			local FOLD_FROM = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöùúûüýÿĀāĂăĄąĆćĈĉĊċČčĎďĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĨĩĪīĬĭĮįİĴĵĶķĹĺĻļĽľŃńŅņŇňŌōŎŏŐőŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹđĐ"
+			local FOLD_TO = "AAAAAACEEEEIIIINOOOOOUUUUYAAAAAACEEEEIIIINOOOOOUUUUYYAAAAAACCCCCCCCDDEEEEEEEEEEGGGGGGGGHHIIIIIIIIIJJKKLLLLLLNNNNNNOOOOOORRRRRRSSSSSSSSTTTTUUUUUUUUUUUUWWYYYZZZZZZAAAAAAAAAAAAAAAAAAAAAAAAEEEEEEEEEEEEEEEEIIIIOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUYYYYYYYYDD"
+			local FoldMap = {}
+			do
+				local idx = 0
+				for _, cp in utf8.codes(FOLD_FROM) do
+					idx = idx + 1
+					FoldMap[cp] = FOLD_TO:sub(idx, idx)
+				end
+			end
+
+			local function normalize(text)
+				local chars = {}
+				for _, cp in utf8.codes(text) do
+					local ch
+					if cp < 128 then
+						ch = string.upper(utf8.char(cp))
+					else
+						ch = FoldMap[cp] or " "
+					end
+					chars[#chars + 1] = ch
+					if #chars >= 20 then
+						break
+					end
+				end
+				return chars
+			end
+
+			local Cache = { Cells = nil, Width = 1, Text = nil, Points = nil, Count = nil, Orientation = nil }
+
+			local function buildCells(text)
+				local chars = normalize(text)
+				local cells = {}
+				local cursor = 0
+				for _, ch in ipairs(chars) do
+					local glyph = FONT[ch] or FONT[" "]
+					for r = 1, 7 do
+						local rowStr = glyph[r]
+						for c = 1, 5 do
+							if rowStr:sub(c, c) == "#" then
+								cells[#cells + 1] = { cursor + c - 1, r - 1 }
+							end
+						end
+					end
+					cursor = cursor + 6
+				end
+				return cells, math.max(cursor - 1, 1)
+			end
+
+			tbl13.AddShape("Text", function(i, n)
+				if i == 1 or not Cache.Points or Cache.Count ~= n or Cache.Text ~= TextShape.Text or Cache.Orientation ~= TextShape.Orientation then
+					local cells, width = buildCells(TextShape.Text)
+					local points = table.create(n)
+					local total = #cells
+					local height = 7
+					local half = (math.max(width, height) - 1) / 2
+					if half < 1 then
+						half = 1
+					end
+					local flat = TextShape.Orientation == "Flat (Horizontal)"
+
+					for k = 1, n do
+						local x, y, depth = 0, 0, 0
+						if total > 0 then
+							local cellIdx, layer
+							if n >= total then
+								cellIdx = ((k - 1) % total) + 1
+								layer = math.floor((k - 1) / total)
+							else
+								cellIdx = math.floor((k - 1) * total / n) + 1
+								layer = 0
+							end
+							local cell = cells[cellIdx]
+							x = (cell[1] - (width - 1) / 2) / half
+							y = ((height - 1) / 2 - cell[2]) / half
+							depth = layer * 0.08
+						end
+						if flat then
+							points[k] = Vector3.new(x, depth, -y)
+						else
+							points[k] = Vector3.new(x, y, depth)
+						end
+					end
+
+					Cache.Points = points
+					Cache.Count = n
+					Cache.Text = TextShape.Text
+					Cache.Orientation = TextShape.Orientation
+				end
+				return Cache.Points[i]
+			end)
+		end
+
+		local function refreshTextShape()
+			table.clear(tbl13.ShapeCache)
+			pcall(function()
+				tbl12.WakeRuntimeGate("ToyAuraEffects")
+			end)
+		end
+
 		v20:AddDropdown("ShapesDropdown", {
 			Values = tbl13.ShapeNames,
 			Default = table.find(tbl13.ShapeNames, toysAuraSettings.Shape) or 1,
@@ -39961,6 +40109,34 @@ end
 			Text = "Shape",
 			Callback = function(shape)
 				toysAuraSettings.Shape = shape
+			end,
+		})
+
+		-- O nhap chu (chi hien khi Shape = Text)
+		local TextShapeBox = v20:AddDependencyBox()
+		TextShapeBox:SetupDependencies({ { options.ShapesDropdown, "Text" } })
+
+		TextShapeBox:AddInput("ToysAuraTextInput", {
+			Text = "Text",
+			Default = TextShape.Text,
+			Placeholder = "Nhap chu (A-Z, 0-9)",
+			ClearTextOnFocus = false,
+			Finished = false,
+			Callback = function(value)
+				TextShape.Text = string.sub(tostring(value or ""), 1, 40)
+				refreshTextShape()
+			end,
+		})
+
+		TextShapeBox:AddDropdown("ToysAuraTextOrientation", {
+			Values = { "Wall (Vertical)", "Flat (Horizontal)" },
+			Default = 1,
+			Multi = false,
+			Text = "Text Direction",
+			Tooltip = "Wall: chu dung (doc duoc tu phia sau nhan vat). Flat: chu nam ngang. Dat Height = Radius de chu khong bi meo",
+			Callback = function(value)
+				TextShape.Orientation = value
+				refreshTextShape()
 			end,
 		})
 
@@ -44576,6 +44752,455 @@ end
 			end,
 		})
 
+		do
+			-- Mini Map (từ Endoris)
+			local Players = game:GetService("Players")
+			local RunService = game:GetService("RunService")
+			local UserInputService = game:GetService("UserInputService")
+			local Workspace = game:GetService("Workspace")
+			local LocalPlayer = Players.LocalPlayer
+
+			local MM = {
+				Enabled = false,
+				Gui = nil,
+				Frame = nil,
+				ViewArrow = nil,
+				Pixels = {},
+				PlayerDots = {},
+				RenderConn = nil,
+				InputConns = {},
+				Zoom = 500,
+				GridRes = 28,
+				Rebuild = nil,
+				Offset = Vector3.zero,
+				LastScanPos = Vector3.zero,
+				LastScanTime = 0,
+			}
+
+			local function stopMiniMap()
+				MM.Enabled = false
+				if MM.RenderConn then
+					MM.RenderConn:Disconnect()
+					MM.RenderConn = nil
+				end
+				for _, conn in ipairs(MM.InputConns) do
+					if conn.Connected then
+						conn:Disconnect()
+					end
+				end
+				MM.InputConns = {}
+				for _, dot in pairs(MM.PlayerDots) do
+					if dot and dot.Parent then
+						dot:Destroy()
+					end
+				end
+				MM.PlayerDots = {}
+				if MM.Gui then
+					MM.Gui:Destroy()
+					MM.Gui = nil
+					MM.Frame = nil
+					MM.ViewArrow = nil
+				end
+				MM.Pixels = {}
+				MM.Rebuild = nil
+			end
+
+			local function startMiniMap()
+				if MM.Gui then
+					return
+				end
+
+				local mapRp = RaycastParams.new()
+				mapRp.FilterType = Enum.RaycastFilterType.Exclude
+
+				local MapGui = Instance.new("ScreenGui")
+				MapGui.Name = "CustomMinimapGui"
+				MapGui.ResetOnSpawn = false
+				pcall(function()
+					MapGui.Parent = game:GetService("CoreGui")
+				end)
+				if not MapGui.Parent then
+					MapGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+				end
+				MM.Gui = MapGui
+
+				local MapFrame = Instance.new("Frame", MapGui)
+				MapFrame.Size = UDim2.new(0, 220, 0, 220)
+				MapFrame.Position = UDim2.new(0.01, 0, 0.02, 0)
+				MapFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+				MapFrame.BorderColor3 = Color3.fromRGB(255, 105, 180)
+				MapFrame.BorderSizePixel = 2
+				MapFrame.ClipsDescendants = true
+				MapFrame.Visible = true
+				MapFrame.Active = true
+				MM.Frame = MapFrame
+
+				local function buildGrid()
+					for _, col in ipairs(MM.Pixels) do
+						for _, px in ipairs(col) do
+							px:Destroy()
+						end
+					end
+					local gridRes = MM.GridRes
+					MM.Pixels = {}
+					for x = 1, gridRes do
+						MM.Pixels[x] = {}
+						for y = 1, gridRes do
+							local p = Instance.new("Frame", MapFrame)
+							p.Size = UDim2.new(1 / gridRes, 0, 1 / gridRes, 0)
+							p.Position = UDim2.new((x - 1) / gridRes, 0, (y - 1) / gridRes, 0)
+							p.BorderSizePixel = 0
+							p.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+							MM.Pixels[x][y] = p
+						end
+					end
+				end
+				MM.Rebuild = function()
+					buildGrid()
+					MM.LastScanTime = 0 -- ép quét lại ngay
+				end
+				buildGrid()
+
+				local viewArrow = Instance.new("ImageLabel", MapFrame)
+				viewArrow.Name = "ViewArrow"
+				viewArrow.AnchorPoint = Vector2.new(0.5, 0.5)
+				viewArrow.Size = UDim2.new(0, 20, 0, 14)
+				viewArrow.BackgroundTransparency = 1
+				viewArrow.ZIndex = 15
+				viewArrow.Image = "rbxassetid://7072706796"
+				viewArrow.ImageColor3 = Color3.fromRGB(0, 255, 255)
+				viewArrow.Rotation = 0
+				MM.ViewArrow = viewArrow
+
+				local dragStartPos = nil
+				local dragging = false
+				local uiMoving = false
+				local mapScrolling = false
+				local pressTime = 0
+				local uiStartPos = nil
+				local mapOffsetStart = nil
+				local moveCon, endCon
+
+				local function onInputBegin(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+						dragging = true
+						uiMoving = false
+						mapScrolling = false
+						pressTime = tick()
+						dragStartPos = input.Position
+						uiStartPos = MapFrame.Position
+						mapOffsetStart = MM.Offset
+
+						moveCon = UserInputService.InputChanged:Connect(function(inp)
+							if
+								(inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch)
+								and dragging
+							then
+								local delta = inp.Position - dragStartPos
+								local elapsed = tick() - pressTime
+								if not uiMoving and not mapScrolling then
+									if delta.Magnitude > 5 then
+										if elapsed > 0.25 then
+											mapScrolling = true
+										else
+											uiMoving = true
+										end
+									end
+								end
+								if uiMoving then
+									MapFrame.Position = UDim2.new(
+										uiStartPos.X.Scale,
+										uiStartPos.X.Offset + delta.X,
+										uiStartPos.Y.Scale,
+										uiStartPos.Y.Offset + delta.Y
+									)
+								elseif mapScrolling then
+									local relX = delta.X / MapFrame.AbsoluteSize.X
+									local relY = delta.Y / MapFrame.AbsoluteSize.Y
+									MM.Offset = mapOffsetStart - Vector3.new(relX * MM.Zoom, 0, relY * MM.Zoom)
+								end
+							end
+						end)
+
+						endCon = UserInputService.InputEnded:Connect(function(inp)
+							if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+								if dragging then
+									dragging = false
+									-- chạm nhẹ (không kéo) = teleport tới vị trí trên map
+									if
+										not uiMoving
+										and not mapScrolling
+										and (inp.Position - dragStartPos).Magnitude < 15
+										and LocalPlayer.Character
+									then
+										local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+										if root then
+											local relX = (inp.Position.X - MapFrame.AbsolutePosition.X) / MapFrame.AbsoluteSize.X - 0.5
+											local relY = (inp.Position.Y - MapFrame.AbsolutePosition.Y) / MapFrame.AbsoluteSize.Y - 0.5
+											local centerPos = root.Position + MM.Offset
+											local targetX = centerPos.X + (relX * MM.Zoom)
+											local targetZ = centerPos.Z + (relY * MM.Zoom)
+											mapRp.FilterDescendantsInstances = { LocalPlayer.Character }
+											local rayRes = Workspace:Raycast(Vector3.new(targetX, 1000, targetZ), Vector3.new(0, -2000, 0), mapRp)
+											local finalY = rayRes and rayRes.Position.Y or root.Position.Y
+											root.CFrame = CFrame.new(targetX, finalY + 4, targetZ)
+										end
+									end
+								end
+								if moveCon then
+									moveCon:Disconnect()
+									moveCon = nil
+								end
+								if endCon then
+									endCon:Disconnect()
+									endCon = nil
+								end
+							end
+						end)
+					end
+				end
+
+				table.insert(MM.InputConns, MapFrame.InputBegan:Connect(onInputBegin))
+				table.insert(
+					MM.InputConns,
+					MapFrame.InputChanged:Connect(function(input)
+						if input.UserInputType == Enum.UserInputType.MouseWheel then
+							MM.Zoom = math.clamp(MM.Zoom + (input.Position.Z * -100), 50, 1500)
+						end
+					end)
+				)
+
+				local initialZoom = MM.Zoom
+				table.insert(
+					MM.InputConns,
+					UserInputService.TouchPinch:Connect(function(_, scale, _, state)
+						if not MapFrame.Visible then
+							return
+						end
+						if state == Enum.UserInputState.Begin then
+							initialZoom = MM.Zoom
+						elseif state == Enum.UserInputState.Change then
+							MM.Zoom = math.clamp(initialZoom / scale, 50, 1500)
+						end
+					end)
+				)
+
+				table.insert(
+					MM.InputConns,
+					Players.PlayerRemoving:Connect(function(p)
+						if MM.PlayerDots[p.Name] then
+							MM.PlayerDots[p.Name]:Destroy()
+							MM.PlayerDots[p.Name] = nil
+						end
+					end)
+				)
+
+				MM.RenderConn = RunService.RenderStepped:Connect(function()
+					if not MM.Enabled then
+						return
+					end
+					local char = LocalPlayer.Character
+					local hrp = char and char:FindFirstChild("HumanoidRootPart")
+					if not hrp then
+						return
+					end
+
+					local centerPos = hrp.Position + MM.Offset
+					local now = tick()
+					local moved = (centerPos - MM.LastScanPos).Magnitude > 6
+					local timed = now - MM.LastScanTime > 1.5
+
+					if MapFrame.Visible and (moved or timed) then
+						MM.LastScanPos = centerPos
+						MM.LastScanTime = now
+						local gridRes = MM.GridRes
+						mapRp.FilterDescendantsInstances = { char }
+						for x = 1, gridRes do
+							for y = 1, gridRes do
+								local offX = ((x - 1) / (gridRes - 1) - 0.5) * MM.Zoom
+								local offZ = ((y - 1) / (gridRes - 1) - 0.5) * MM.Zoom
+								local ray = Workspace:Raycast(centerPos + Vector3.new(offX, 100, offZ), Vector3.new(0, -200, 0), mapRp)
+								if ray and ray.Instance then
+									local partColor = ray.Instance.Color
+									local h = math.clamp((ray.Position.Y - centerPos.Y + 30) / 60, 0.3, 1.2)
+									MM.Pixels[x][y].BackgroundColor3 = Color3.fromRGB(
+										math.clamp(partColor.R * 255 * h, 0, 255),
+										math.clamp(partColor.G * 255 * h, 0, 255),
+										math.clamp(partColor.B * 255 * h, 0, 255)
+									)
+								else
+									MM.Pixels[x][y].BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+								end
+							end
+						end
+					end
+
+					if MapFrame.Visible then
+						local cam = Workspace.CurrentCamera
+						if cam and MM.ViewArrow then
+							local lookVec = cam.CFrame.LookVector
+							local angle = math.atan2(lookVec.Z, lookVec.X)
+							local radius = 18
+							MM.ViewArrow.Position = UDim2.new(
+								0.5 + math.cos(angle) * radius / MapFrame.AbsoluteSize.X,
+								0,
+								0.5 + math.sin(angle) * radius / MapFrame.AbsoluteSize.Y,
+								0
+							)
+							MM.ViewArrow.Rotation = math.deg(angle) + 90
+						end
+
+						for _, p in pairs(Players:GetPlayers()) do
+							local pr = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+							if pr then
+								local d = MM.PlayerDots[p.Name]
+								if not d then
+									d = Instance.new("Frame", MapFrame)
+									d.Size = UDim2.new(0, 26, 0, 26)
+									d.AnchorPoint = Vector2.new(0.5, 0.5)
+									d.BackgroundTransparency = 1
+									d.ZIndex = 10
+
+									local iconBg = Instance.new("Frame", d)
+									iconBg.Size = UDim2.new(1, 0, 1, 0)
+									iconBg.BackgroundColor3 = (p == LocalPlayer) and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(255, 50, 50)
+									Instance.new("UICorner", iconBg).CornerRadius = UDim.new(1, 0)
+
+									local icon = Instance.new("ImageLabel", iconBg)
+									icon.Size = UDim2.new(1, -4, 1, -4)
+									icon.Position = UDim2.new(0, 2, 0, 2)
+									icon.BackgroundTransparency = 1
+									icon.ClipsDescendants = true
+									Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
+									task.spawn(function()
+										local ok, url = pcall(function()
+											return Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+										end)
+										if ok and url then
+											icon.Image = url
+										end
+									end)
+
+									local nameLbl = Instance.new("TextLabel", d)
+									nameLbl.Size = UDim2.new(0, 100, 0, 12)
+									nameLbl.Position = UDim2.new(0.5, -50, 1, 2)
+									nameLbl.BackgroundTransparency = 1
+									nameLbl.Text = p.DisplayName
+									nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+									nameLbl.TextStrokeTransparency = 0.3
+									nameLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+									nameLbl.TextSize = 10
+									nameLbl.Font = Enum.Font.GothamBold
+									nameLbl.ZIndex = 11
+
+									MM.PlayerDots[p.Name] = d
+								end
+								local rx = (pr.Position.X - centerPos.X) / MM.Zoom
+								local rz = (pr.Position.Z - centerPos.Z) / MM.Zoom
+								d.Position = UDim2.new(0.5 + rx, 0, 0.5 + rz, 0)
+								d.Visible = math.abs(rx) < 0.5 and math.abs(rz) < 0.5
+							end
+						end
+					end
+				end)
+			end
+
+			Gamepasses2:AddToggle("MiniMapT", {
+				Text = "Mini Map",
+				Default = false,
+				Tooltip = "Bản đồ nhỏ: kéo nhanh để di chuyển UI, giữ rồi kéo để cuộn map, chạm để teleport, lăn chuột/chụm tay để zoom",
+				Callback = function(value)
+					if value then
+						MM.Enabled = true
+						startMiniMap()
+					else
+						stopMiniMap()
+					end
+				end,
+			})
+
+			-- Chỉnh độ nét pixel của Mini Map
+			local QualityLevels = {
+				["Blurrier (20x20)"] = 20,
+				["Default (28x28)"] = 28,
+				["Clearer (48x48)"] = 48,
+				["Ultra Sharp (100x100) - 180+ FPS"] = 100,
+			}
+			local ULTRA_NAME = "Ultra Sharp (100x100) - 180+ FPS"
+			local MIN_FPS_ULTRA = 180
+			local CurrentQuality = "Default (28x28)"
+			local Reverting = false
+			local QualityDropdown
+
+			local function notify(text)
+				pcall(function()
+					lib:Notify({ Title = "Mini Map", Description = text, Time = 5 })
+				end)
+			end
+
+			local function measureFPS(duration)
+				local frames = 0
+				local t0 = tick()
+				while tick() - t0 < duration do
+					RunService.RenderStepped:Wait()
+					frames += 1
+				end
+				return frames / math.max(tick() - t0, 0.001)
+			end
+
+			local function applyQuality(name)
+				CurrentQuality = name
+				MM.GridRes = QualityLevels[name]
+				if MM.Rebuild then
+					MM.Rebuild()
+				end
+			end
+
+			QualityDropdown = Gamepasses2:AddDropdown("MiniMapQuality", {
+				Values = {
+					"Blurrier (20x20)",
+					"Default (28x28)",
+					"Clearer (48x48)",
+					ULTRA_NAME,
+				},
+				Default = 2,
+				Multi = false,
+				Text = "Mini Map Pixel",
+				Tooltip = "Ultra Sharp rất nặng, chỉ bật được khi máy đạt từ 180 FPS trở lên",
+				Callback = function(value)
+					if Reverting or not QualityLevels[value] or value == CurrentQuality then
+						return
+					end
+
+					if value ~= ULTRA_NAME then
+						applyQuality(value)
+						return
+					end
+
+					-- Ultra Sharp: đo FPS trước khi cho bật
+					task.spawn(function()
+						notify("Dang do FPS de bat Ultra Sharp...")
+						local fps = measureFPS(1.5)
+						if fps >= MIN_FPS_ULTRA then
+							applyQuality(value)
+							notify(string.format("Ultra Sharp ON (%d FPS)", fps))
+						else
+							notify(string.format("FPS %d < %d, khong the bat Ultra Sharp", fps, MIN_FPS_ULTRA))
+							Reverting = true
+							pcall(function()
+								QualityDropdown:SetValue(CurrentQuality)
+							end)
+							Reverting = false
+						end
+					end)
+				end,
+			})
+
+			pcall(function()
+				lib:OnUnload(stopMiniMap)
+			end)
+		end
+
 		local Config = Gamepasses:AddTab("Config", "settings")
 
 		Config:AddSlider("FastEscapeSlider", {
@@ -46174,6 +46799,622 @@ Rejoined: %rejoinedPlayer%, %listCount%]],
 		tbl12.UpdateKeybindMenu()
 		tbl12.UpdateEnabledToggleCount()
 	end)
+
+	do
+		-- ==========================================
+		-- COIN UI MOD: ảnh mới + viền neon có tia trắng chạy quanh KHUNG chứa coin
+		-- (kiểu nhãn dán iPhone). Chạy ngay khi load, quét lại mỗi 3s để tránh
+		-- bị game reset, unload UI sẽ trả giao diện coin về như cũ.
+		-- ==========================================
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+
+		local OLD_DECAL_ID = "8659337867"
+		local NEW_ASSET = "rbxassetid://81779612840035"
+		local REAPPLY_INTERVAL = 3 -- giây
+		local SWEEP_TIME = 4 -- giây / 1 vòng quanh khung (lớn hơn = chạy chậm hơn)
+		local STREAK_FRAC = 0.22 -- độ dài tia sáng (tỉ lệ chu vi khung)
+		local LINE_THICKNESS = 2 -- lõi tia trắng
+		local GLOW_THICKNESS = 5 -- quầng neon trong
+		local HALO_THICKNESS = 10 -- quầng neon ngoài
+		local PAD_X = 14 -- khoảng đệm viền so với chữ + coin (px), nhỏ hơn = viền ngắn hơn
+		local PAD_Y = 6 -- khoảng đệm trên/dưới khi HUG_HEIGHT = true
+		local HUG_HEIGHT = false -- true: viền ôm sát cả chiều cao chữ/coin; false: giữ chiều cao khung gốc
+
+		local WHITE = Color3.new(1, 1, 1)
+
+		local State = {
+			Active = true,
+			Cleaned = false,
+			Images = {},
+			Texts = {},
+			Frames = {},
+			Thread = nil,
+			AddedConn = nil,
+			RenderConn = nil,
+		}
+
+		-- ---------- tia sáng chạy quanh chu vi ----------
+		local EDGES = {
+			{ Axis = 0, Reverse = false }, -- trên: trái -> phải
+			{ Axis = 90, Reverse = false }, -- phải: trên -> dưới
+			{ Axis = 0, Reverse = true }, -- dưới: phải -> trái
+			{ Axis = 90, Reverse = true }, -- trái: dưới -> trên
+		}
+		local LAYERS = {
+			{ Thickness = HALO_THICKNESS, Transparency = 0.8 },
+			{ Thickness = GLOW_THICKNESS, Transparency = 0.4 },
+			{ Thickness = LINE_THICKNESS, Transparency = 0 },
+		}
+
+		local function edgeGeometry(i, T)
+			if i == 1 then
+				return UDim2.new(0, 0, 0, -T / 2), UDim2.new(1, 0, 0, T)
+			elseif i == 2 then
+				return UDim2.new(1, -T / 2, 0, 0), UDim2.new(0, T, 1, 0)
+			elseif i == 3 then
+				return UDim2.new(0, 0, 1, -T / 2), UDim2.new(1, 0, 0, T)
+			end
+			return UDim2.new(0, -T / 2, 0, 0), UDim2.new(0, T, 1, 0)
+		end
+
+		-- dải sáng tâm u (0..1 dọc theo cạnh), nửa rộng hw (cùng đơn vị)
+		local function buildSeq(u, hw)
+			if hw < 0.001 then
+				hw = 0.001
+			end
+			local cand = { 0, u - hw, u, u + hw, 1 }
+			table.sort(cand)
+			local times = {}
+			for _, t in ipairs(cand) do
+				if t >= 0 and t <= 1 then
+					local last = times[#times]
+					if not last or t - last > 0.0001 then
+						times[#times + 1] = t
+					end
+				end
+			end
+			if times[#times] < 1 then
+				if 1 - times[#times] <= 0.0001 then
+					times[#times] = 1
+				else
+					times[#times + 1] = 1
+				end
+			end
+			local keys = {}
+			for i, t in ipairs(times) do
+				local alpha = math.max(0, 1 - math.abs(t - u) / hw)
+				keys[i] = NumberSequenceKeypoint.new(t, math.clamp(1 - alpha, 0, 1))
+			end
+			return NumberSequence.new(keys)
+		end
+
+		local function destroyFrameFx(rec)
+			if rec.Holder then
+				pcall(function()
+					rec.Holder:Destroy()
+				end)
+			end
+			if rec.BaseStroke then
+				pcall(function()
+					rec.BaseStroke:Destroy()
+				end)
+			end
+			rec.Holder = nil
+			rec.BaseStroke = nil
+			rec.Edges = {}
+		end
+
+		local function buildFrameFx(container, rec)
+			destroyFrameFx(rec)
+
+			local holder = Instance.new("Frame")
+			holder.Name = "CoinSweepHolder"
+			holder.BackgroundTransparency = 1
+			holder.BorderSizePixel = 0
+			holder.Size = UDim2.new(1, 0, 1, 0) -- sẽ được co lại theo coin + chữ trong updateSweep
+			holder.ZIndex = 100
+			holder.Active = false
+			pcall(function()
+				holder.Interactable = false
+			end)
+			holder.Parent = container
+			rec.Holder = holder
+
+			-- viền mờ nền: gắn vào holder (co theo coin + chữ), bo góc giống khung gốc
+			local corner = Instance.new("UICorner")
+			local srcCorner = container:FindFirstChildOfClass("UICorner")
+			corner.CornerRadius = srcCorner and srcCorner.CornerRadius or UDim.new(0, 8)
+			corner.Parent = holder
+
+			local base = Instance.new("UIStroke")
+			base.Name = "CoinSweepBase"
+			base.Color = WHITE
+			base.Thickness = 1
+			base.Transparency = 0.85
+			base.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			base.Parent = holder
+			rec.BaseStroke = base
+
+			rec.Edges = {}
+			for i, edge in ipairs(EDGES) do
+				local gradients = {}
+				for _, layer in ipairs(LAYERS) do
+					local pos, size = edgeGeometry(i, layer.Thickness)
+					local f = Instance.new("Frame")
+					f.Name = "CoinSweepEdge" .. i
+					f.BackgroundColor3 = WHITE
+					f.BackgroundTransparency = layer.Transparency
+					f.BorderSizePixel = 0
+					f.Position = pos
+					f.Size = size
+					f.ZIndex = 100
+					f.Active = false
+					local g = Instance.new("UIGradient")
+					g.Rotation = edge.Axis
+					g.Transparency = NumberSequence.new(1)
+					g.Parent = f
+					f.Parent = holder
+					table.insert(gradients, g)
+				end
+				rec.Edges[i] = { Reverse = edge.Reverse, Gradients = gradients }
+			end
+		end
+
+		-- hệ số UIScale (nếu có) của khung và các cha của nó
+		local function getUiScale(gui)
+			local k = 1
+			local p = gui
+			while p and p:IsA("GuiObject") do
+				local us = p:FindFirstChildOfClass("UIScale")
+				if us then
+					k = k * us.Scale
+				end
+				p = p.Parent
+			end
+			return k
+		end
+
+		-- vùng (px màn hình) ôm sát ảnh coin + chữ số của khung này
+		local function contentBounds(container)
+			local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+			local function add(x0, y0, x1, y1)
+				if x0 < minX then minX = x0 end
+				if y0 < minY then minY = y0 end
+				if x1 > maxX then maxX = x1 end
+				if y1 > maxY then maxY = y1 end
+			end
+
+			for obj, imgRec in pairs(State.Images) do
+				if imgRec.Container == container and obj.Parent and obj.Visible then
+					local p, s = obj.AbsolutePosition, obj.AbsoluteSize
+					add(p.X, p.Y, p.X + s.X, p.Y + s.Y)
+				end
+			end
+
+			for obj in pairs(State.Texts) do
+				if obj.Parent and obj.Visible and obj.Text ~= "" and obj:IsDescendantOf(container) then
+					local p, s, tb = obj.AbsolutePosition, obj.AbsoluteSize, obj.TextBounds
+					local tw = math.min(tb.X, s.X)
+					local th = math.min(tb.Y, s.Y)
+					local x0
+					if obj.TextXAlignment == Enum.TextXAlignment.Left then
+						x0 = p.X
+					elseif obj.TextXAlignment == Enum.TextXAlignment.Right then
+						x0 = p.X + s.X - tw
+					else
+						x0 = p.X + (s.X - tw) / 2
+					end
+					local y0
+					if obj.TextYAlignment == Enum.TextYAlignment.Top then
+						y0 = p.Y
+					elseif obj.TextYAlignment == Enum.TextYAlignment.Bottom then
+						y0 = p.Y + s.Y - th
+					else
+						y0 = p.Y + (s.Y - th) / 2
+					end
+					add(x0, y0, x0 + tw, y0 + th)
+				end
+			end
+
+			if minX == math.huge then
+				return nil
+			end
+			return minX, minY, maxX, maxY
+		end
+
+		local function updateSweep(container, rec)
+			if not container.Visible then
+				return
+			end
+			local cp, cs = container.AbsolutePosition, container.AbsoluteSize
+			if cs.X < 4 or cs.Y < 4 then
+				return
+			end
+
+			-- co viền lại: chỉ ôm coin + chữ, không kéo dài hết khung
+			local x0, y0, x1, y1 = cp.X, cp.Y, cp.X + cs.X, cp.Y + cs.Y
+			local bx0, by0, bx1, by1 = contentBounds(container)
+			if bx0 then
+				x0 = math.max(x0, bx0 - PAD_X)
+				x1 = math.min(x1, bx1 + PAD_X)
+				if HUG_HEIGHT then
+					y0 = math.max(y0, by0 - PAD_Y)
+					y1 = math.min(y1, by1 + PAD_Y)
+				end
+			end
+			local k = getUiScale(container)
+			if k <= 0 then
+				k = 1
+			end
+			local holder = rec.Holder
+			if holder then
+				holder.Position = UDim2.fromOffset((x0 - cp.X) / k, (y0 - cp.Y) / k)
+				holder.Size = UDim2.fromOffset((x1 - x0) / k, (y1 - y0) / k)
+			end
+
+			local w, h = x1 - x0, y1 - y0
+			if w < 4 or h < 4 then
+				return
+			end
+
+			local perimeter = 2 * (w + h)
+			local s = ((os.clock() - rec.T0) / SWEEP_TIME % 1) * perimeter
+			local hw = STREAK_FRAC * perimeter / 2
+
+			for i, e in ipairs(rec.Edges) do
+				local len, start
+				if i == 1 then
+					len, start = w, 0
+				elseif i == 2 then
+					len, start = h, w
+				elseif i == 3 then
+					len, start = w, w + h
+				else
+					len, start = h, 2 * w + h
+				end
+
+				-- chọn bản sao (vòng quanh) gần giữa cạnh nhất
+				local a = s - start
+				local best = a
+				if math.abs(a + perimeter - len / 2) < math.abs(best - len / 2) then
+					best = a + perimeter
+				end
+				if math.abs(a - perimeter - len / 2) < math.abs(best - len / 2) then
+					best = a - perimeter
+				end
+
+				local u = best / len
+				if e.Reverse then
+					u = 1 - u
+				end
+				local seq = buildSeq(u, hw / len)
+				for _, g in ipairs(e.Gradients) do
+					g.Transparency = seq
+				end
+			end
+		end
+
+		-- khung có đang HIỆN thật sự không (nền không trong suốt, mọi cha đều hiện)
+		local function isShown(gui)
+			if gui.BackgroundTransparency >= 0.99 then
+				return false
+			end
+			local size = gui.AbsoluteSize
+			if size.X < 4 or size.Y < 4 then
+				return false
+			end
+			local p = gui
+			while p do
+				if p:IsA("GuiObject") then
+					if not p.Visible then
+						return false
+					end
+				elseif p:IsA("LayerCollector") then
+					if not p.Enabled then
+						return false
+					end
+				end
+				p = p.Parent
+			end
+			return true
+		end
+
+		local function ensureRender()
+			if State.RenderConn or not State.Active then
+				return
+			end
+			local nextShowCheck = 0
+			State.RenderConn = RunService.RenderStepped:Connect(function()
+				-- khung ẩn / trong suốt / bị xoá -> vứt viền
+				for container, rec in pairs(State.Frames) do
+					if not container.Parent or not isShown(container) then
+						State.Frames[container] = nil
+						destroyFrameFx(rec)
+					else
+						updateSweep(container, rec)
+					end
+				end
+
+				-- khung vừa hiện lại -> bao viền (kiểm tra 5 lần/giây cho nhẹ)
+				local now = os.clock()
+				if now >= nextShowCheck then
+					nextShowCheck = now + 0.2
+					for _, imgRec in pairs(State.Images) do
+						local c = imgRec.Container
+						if c and not State.Frames[c] and c.Parent and isShown(c) then
+							local ok = pcall(function()
+								local rec = { Holder = nil, BaseStroke = nil, Edges = {}, T0 = os.clock() }
+								State.Frames[c] = rec
+								buildFrameFx(c, rec)
+							end)
+							if not ok then
+								State.Frames[c] = nil
+							end
+						end
+					end
+				end
+			end)
+		end
+
+		local function ensureFrameFx(container)
+			local rec = State.Frames[container]
+			if not rec then
+				rec = { Holder = nil, BaseStroke = nil, Edges = {}, T0 = os.clock() }
+				State.Frames[container] = rec
+				buildFrameFx(container, rec)
+			elseif not rec.Holder or rec.Holder.Parent ~= container or not rec.BaseStroke or rec.BaseStroke.Parent ~= rec.Holder then
+				-- bị game xoá -> tạo lại
+				buildFrameFx(container, rec)
+			end
+			ensureRender()
+		end
+
+		local function releaseFrame(container, rec)
+			destroyFrameFx(rec)
+			State.Frames[container] = nil
+		end
+
+		-- ---------- tìm KHUNG chứa đồng xu ----------
+		local function isHuge(gui)
+			local cam = workspace.CurrentCamera
+			if not cam then
+				return false
+			end
+			local vp = cam.ViewportSize
+			local s = gui.AbsoluteSize
+			return s.X > vp.X * 0.6 and s.Y > vp.Y * 0.6
+		end
+
+		-- khung gần nhất bao ảnh coin và có nền thật (BackgroundTransparency < 1)
+		local function findContainer(img)
+			local cur = img.Parent
+			while cur and cur:IsA("GuiObject") do
+				if cur.BackgroundTransparency < 0.99 and not isHuge(cur) then
+					return cur
+				end
+				cur = cur.Parent
+			end
+			return nil
+		end
+
+		-- ---------- ảnh đồng xu (chỉ đổi ID, không xoay) ----------
+		local function releaseImage(obj, rec, restore)
+			for _, c in ipairs(rec.Conns) do
+				c:Disconnect()
+			end
+			rec.Conns = {}
+			if restore and obj.Parent then
+				pcall(function()
+					obj.Image = rec.Orig.Image
+					obj.BackgroundTransparency = rec.Orig.BackgroundTransparency
+					obj.ScaleType = rec.Orig.ScaleType
+					obj.Rotation = rec.Orig.Rotation
+				end)
+			end
+			State.Images[obj] = nil
+		end
+
+		local function trackImage(obj)
+			local rec = State.Images[obj]
+			if rec then
+				-- chạy lại: chỉ gán lại những thứ bị game reset
+				if obj.Image ~= NEW_ASSET then
+					obj.Image = NEW_ASSET
+				end
+				if obj.BackgroundTransparency ~= 1 then
+					obj.BackgroundTransparency = 1
+				end
+				if obj.ScaleType ~= Enum.ScaleType.Fit then
+					obj.ScaleType = Enum.ScaleType.Fit
+				end
+				if obj.Rotation ~= 0 then
+					obj.Rotation = 0
+				end
+			else
+				rec = {
+					Orig = {
+						Image = obj.Image,
+						BackgroundTransparency = obj.BackgroundTransparency,
+						ScaleType = obj.ScaleType,
+						Rotation = obj.Rotation,
+					},
+					Conns = {},
+				}
+				State.Images[obj] = rec
+
+				obj.BackgroundTransparency = 1
+				obj.ScaleType = Enum.ScaleType.Fit
+				obj.Image = NEW_ASSET
+				obj.Rotation = 0
+
+				-- game đổi ảnh lại thì đổi về ngay (chỉ chạy khi ảnh thay đổi)
+				table.insert(
+					rec.Conns,
+					obj:GetPropertyChangedSignal("Image"):Connect(function()
+						if State.Active and obj.Image ~= NEW_ASSET then
+							obj.Image = NEW_ASSET
+						end
+					end)
+				)
+				-- UI bị xoá thì dọn luôn
+				table.insert(
+					rec.Conns,
+					obj.AncestryChanged:Connect(function()
+						if not obj:IsDescendantOf(game) then
+							releaseImage(obj, rec, false)
+						end
+					end)
+				)
+			end
+
+			-- khung chứa (viền chỉ được vẽ khi khung này đang hiện)
+			rec.Container = findContainer(obj)
+			if rec.Container and isShown(rec.Container) then
+				ensureFrameFx(rec.Container)
+			end
+			ensureRender()
+		end
+
+		-- ---------- chữ coins ----------
+		local function releaseText(obj, rec, restore)
+			if rec.Stroke then
+				pcall(function()
+					rec.Stroke:Destroy()
+				end)
+			end
+			if restore and obj.Parent then
+				pcall(function()
+					obj.TextColor3 = rec.OrigColor
+				end)
+			end
+			State.Texts[obj] = nil
+		end
+
+		local function trackText(obj)
+			local rec = State.Texts[obj]
+			if not rec then
+				rec = { OrigColor = obj.TextColor3, Stroke = nil }
+				State.Texts[obj] = rec
+			end
+			if obj.TextColor3 ~= WHITE then
+				obj.TextColor3 = WHITE
+			end
+			if not obj:FindFirstChild("TextBlackStroke") then
+				local tStroke = Instance.new("UIStroke")
+				tStroke.Name = "TextBlackStroke"
+				tStroke.Thickness = 2
+				tStroke.Color = Color3.fromRGB(0, 0, 0)
+				tStroke.Parent = obj
+				rec.Stroke = tStroke
+			end
+		end
+
+		-- ---------- xử lý + quét ----------
+		local function process(obj)
+			if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+				if State.Images[obj] or obj.Name == "CoinImage" or string.find(obj.Image, OLD_DECAL_ID, 1, true) then
+					trackImage(obj)
+				end
+			elseif obj:IsA("TextLabel") and (obj.Name == "Blank" or obj.Name == "Coins") then
+				trackText(obj)
+			end
+		end
+
+		local function scan(PlayerGui)
+			local n = 0
+			for _, obj in ipairs(PlayerGui:GetDescendants()) do
+				if not State.Active then
+					return
+				end
+				pcall(process, obj)
+				n = n + 1
+				if n % 400 == 0 then
+					task.wait() -- chia nhỏ để không giật
+				end
+			end
+
+			-- dọn các coin / khung đã biến mất khỏi PlayerGui
+			for obj, rec in pairs(State.Images) do
+				if not obj:IsDescendantOf(PlayerGui) then
+					pcall(releaseImage, obj, rec, false)
+				end
+			end
+			for obj, rec in pairs(State.Texts) do
+				if not obj:IsDescendantOf(PlayerGui) then
+					pcall(releaseText, obj, rec, false)
+				end
+			end
+			local used = {}
+			for _, imgRec in pairs(State.Images) do
+				if imgRec.Container then
+					used[imgRec.Container] = true
+				end
+			end
+			for container, rec in pairs(State.Frames) do
+				if not used[container] or not container:IsDescendantOf(PlayerGui) then
+					pcall(releaseFrame, container, rec)
+				end
+			end
+		end
+
+		-- ---------- trả UI về như cũ khi unload ----------
+		local function cleanup()
+			if State.Cleaned then
+				return
+			end
+			State.Cleaned = true
+			State.Active = false
+			if State.AddedConn then
+				State.AddedConn:Disconnect()
+				State.AddedConn = nil
+			end
+			if State.RenderConn then
+				State.RenderConn:Disconnect()
+				State.RenderConn = nil
+			end
+			for container, rec in pairs(State.Frames) do
+				pcall(releaseFrame, container, rec)
+			end
+			for obj, rec in pairs(State.Images) do
+				pcall(releaseImage, obj, rec, true)
+			end
+			for obj, rec in pairs(State.Texts) do
+				pcall(releaseText, obj, rec, true)
+			end
+			if State.Thread then
+				pcall(task.cancel, State.Thread)
+				State.Thread = nil
+			end
+		end
+		pcall(function()
+			lib:OnUnload(cleanup)
+		end)
+
+		-- ---------- chạy ngay + lặp lại mỗi 3s ----------
+		State.Thread = task.spawn(function()
+			local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+			if not State.Active then
+				return
+			end
+
+			-- UI coin mới xuất hiện thì xử lý ngay (defer để game kịp gán thuộc tính)
+			State.AddedConn = PlayerGui.DescendantAdded:Connect(function(obj)
+				if State.Active then
+					task.defer(function()
+						if State.Active and obj.Parent then
+							pcall(process, obj)
+						end
+					end)
+				end
+			end)
+
+			while State.Active do
+				pcall(scan, PlayerGui)
+				task.wait(REAPPLY_INTERVAL)
+			end
+		end)
+	end
 
 	lib:OnUnload(function()
 		local now2 = os.clock()
