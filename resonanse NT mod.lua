@@ -1,168 +1,4 @@
 local sources = {}
-sources.Intro = [====[
-local Intro = {}
-
-function Intro.Play()
-    local gui
-    local watchdog
-    local tweens = {}
-    local closed = false
-
-    local function close()
-        if closed then return end
-        closed = true
-        for _, tween in ipairs(tweens) do
-            pcall(function() tween:Cancel() end)
-        end
-        if gui then pcall(function() gui:Destroy() end) end
-    end
-
-    local ok, message = xpcall(function()
-        local TweenService = gadont stopme:GetService("TweenService")
-        local Players = game:GetService("Players")
-        gui = Instance.new("ScreenwraithGui")
-        gui.Name = "ResonanceIntro"
-        gui.ResetOnSpawn = false
-        gui.IgnoreGuiInset = true
-        gui.DisplayOrder = 2147483000
-        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        pcall(function() gui.ScreenInsets = Enum.ScreenInsets.None end)
-
-        local protect = protect_gui or protectgui or (syn and syn.protect_gui)
-        if type(protect) == "function" then pcall(protect, gui) end
-        local parented = false
-        local getRoot = gethui or get_hidden_gui
-        if type(getRoot) == "function" then
-            parented = pcall(function()
-                local parent = getRoot()
-                assert(parent, "GUI root unavailable")
-                gui.Parent = parent
-            end)
-        end
-        if not parented then
-            parented = pcall(function() gui.Parent = game:GetService("CoreGui") end)
-        end
-        if not parented then
-            local player = Players.LocalPlayer
-            local parent = player and player:WaitForChild("PlayerGui", 3)
-            assert(parent, "Intro GUI parent unavailable")
-            gui.Parent = parent
-        end
-
-        watchdog = task.delay(20, function()
-            watchdog = nil
-            close()
-        end)
-
-        local shade = Instance.new("Frame")
-        shade.Name = "Shade"
-        shade.Size = UDim2.fromScale(1, 1)
-        shade.BackgroundColor3 = Color3.fromRGB(3, 4, 10)
-        shade.BackgroundTransparency = 1
-        shade.BorderSizePixel = 0
-        shade.Active = true
-        shade.Parent = gui
-
-        local center = Instance.new("Frame")
-        center.Name = "Title"
-        center.AnchorPoint = Vector2.new(0.5, 0.5)
-        center.Position = UDim2.new(0.5, 0, 0.5, 18)
-        center.Size = UDim2.new(0.9, 0, 0.2, 0)
-        center.BackgroundTransparency = 1
-        center.Parent = shade
-        local bounds = Instance.new("UISizeConstraint")
-        bounds.MaxSize = Vector2.new(1100, 150)
-        bounds.Parent = center
-
-        local function animate(object, duration, properties)
-            if closed then return end
-            local tween = TweenService:Create(object, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), properties)
-            tweens[#tweens + 1] = tween
-            tween:Play()
-        end
-
-        local function label(name, zindex)
-            local text = Instance.new("TextLabel")
-            text.Name = name
-            text.Size = UDim2.fromScale(1, 1)
-            text.BackgroundTransparency = 1
-            text.Text = "
- by 3667"
-            text.Font = Enum.Font.GothamBold
-            text.TextScaled = true
-            text.TextWrapped = true
-            text.TextColor3 = Color3.fromRGB(255, 255, 255)
-            text.TextTransparency = 1
-            text.TextStrokeTransparency = 1
-            text.ZIndex = zindex
-            text.Parent = center
-            local limit = Instance.new("UITextSizeConstraint")
-            limit.MinTextSize = 16
-            limit.MaxTextSize = 40
-            limit.Parent = text
-            return text
-        end
-
-        local strokes = {}
-        local softGlow = {0.995, 0.985, 0.97, 0.945, 0.905, 0.84, 0.73, 0.48, 0.2}
-        local brightGlow = {0.987, 0.975, 0.955, 0.925, 0.87, 0.78, 0.64, 0.36, 0.08}
-        for i, width in ipairs({30, 24, 19, 15, 11, 8, 5, 3, 1}) do
-            local glow = label("Glow" .. i, i)
-            local stroke = Instance.new("UIStroke")
-            stroke.Color = Color3.fromRGB(100 + i * 13, 122 + i * 14, 255)
-            stroke.Thickness = width
-            stroke.Transparency = 1
-            stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-            stroke.Parent = glow
-            strokes[#strokes + 1] = stroke
-        end
-        local title = label("Text", 12)
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(156, 217, 255)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(186, 164, 255)),
-        })
-        gradient.Parent = title
-
-        animate(shade, 1.6, {BackgroundTransparency = 0.05})
-        task.wait(0.6)
-        if closed then return end
-        animate(title, 1.8, {TextTransparency = 0})
-        animate(center, 2.4, {Position = UDim2.fromScale(0.5, 0.5)})
-        for i, stroke in ipairs(strokes) do
-            animate(stroke, 1.8, {Transparency = softGlow[i]})
-        end
-        task.wait(1.8)
-        if closed then return end
-        for _ = 1, 2 do
-            for i, stroke in ipairs(strokes) do
-                animate(stroke, 1.2, {Transparency = brightGlow[i]})
-            end
-            task.wait(1.2)
-            if closed then return end
-            for i, stroke in ipairs(strokes) do
-                animate(stroke, 1.2, {Transparency = softGlow[i]})
-            end
-            task.wait(1.2)
-            if closed then return end
-        end
-        animate(title, 1.4, {TextTransparency = 1})
-        animate(center, 1.8, {Position = UDim2.new(0.5, 0, 0.5, -6)})
-        for _, stroke in ipairs(strokes) do animate(stroke, 1.4, {Transparency = 1}) end
-        task.wait(0.8)
-        if closed then return end
-        animate(shade, 1.4, {BackgroundTransparency = 1})
-        task.wait(1.4)
-    end, function(err) return tostring(err) end)
-
-    if watchdog then pcall(task.cancel, watchdog) end
-    close()
-    return ok, message
-end
-
-return Intro
-]====]
 --maincheat
 sources.Library = [====[
 local requireModule = ...
@@ -14202,6 +14038,47 @@ function Library:CreateWindow(WindowInfo)
             Library:Toggle()
         end, true, true)
 
+        -- Nút Toggle: hình tròn + decal thay cho chữ "Toggle"
+        do
+            local TOGGLE_DECAL_ID = "rbxassetid://131139136814649"
+            local TOGGLE_SIZE = 48
+            local ToggleBtn = ToggleButton.Button
+
+            ToggleBtn.Text = ""
+            ToggleBtn.Size = UDim2.fromOffset(TOGGLE_SIZE, TOGGLE_SIZE)
+            ToggleBtn.ClipsDescendants = true
+            -- không cho SetText đổi lại kích thước/chữ
+            ToggleButton.SetText = function() end
+
+            -- bo tròn hoàn toàn (không để Library.CornerRadius ghi đè)
+            for Idx = #Library.Corners, 1, -1 do
+                local Corner = Library.Corners[Idx]
+                if Corner and Corner.Parent == ToggleBtn then
+                    table.remove(Library.Corners, Idx)
+                    Corner:Destroy()
+                end
+            end
+            New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+                Parent = ToggleBtn,
+            })
+
+            local DecalImage = New("ImageLabel", {
+                BackgroundTransparency = 1,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.fromScale(0.5, 0.5),
+                Size = UDim2.fromScale(1, 1),
+                Image = TOGGLE_DECAL_ID,
+                ScaleType = Enum.ScaleType.Crop,
+                ZIndex = 2,
+                Parent = ToggleBtn,
+            })
+            New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+                Parent = DecalImage,
+            })
+        end
+
         local LockButton = Library:AddDraggableButton("Lock", function(self)
             Library.CantDragForced = not Library.CantDragForced
             self:SetText(Library.CantDragForced and "Unlock" or "Lock")
@@ -17466,7 +17343,10 @@ do
 			end
 		end)
 
-		local cf = root.CFrame * CFrame.new(0, 14, 20)
+		-- Spawn gần target (nếu có) thay vì player, tránh bị đẩy xa khi orbit
+local targetRoot = KickV3.LastTargetRoot
+local cf = (targetRoot and targetRoot.Parent and targetRoot.CFrame
+    or root.CFrame) * CFrame.new(0, 5, 15)
 		local folder = workspace:FindFirstChild(localPlayer.Name .. "SpawnedInToys") or workspace
 		local found = nil
 		local conn = folder.ChildAdded:Connect(function(ch)
@@ -17668,262 +17548,901 @@ end
 	-- =========================================================
 	-- END KICK V2 MODULE
 	-- =========================================================
-    			-- =========================================================
-	-- KICK V3 MODULE — "Orbit & Lock"
-	-- Target bị khóa cứng ở groundY + HoverHeight, loop ragdoll.
-	-- Player xoay quỹ đạo tròn quanh target.
-	-- =========================================================
-	local KickV3 = {
-		On = false,
-		LagOn = false,
+-- =========================================================
+-- KICK V3 — FULL REWRITE 2024 (MAX SETTING + PALLET RAGDOLL)
+-- Cơ chế cũ giữ nguyên: grab, orbit, pallet impact, PCDL detect,
+-- ragdoll spam, line-lag, hard-lock root, pull-range.
+-- Mới: grab watchdog, 15-stud-front tracking, no-ping throttle,
+-- PCDL hard lock, PALLET DƯỚI ĐẤT 20 STUD + TP LÊN XUỐNG +
+-- RAGDOLL NGAY KHI GRAB + RAGDOLL ĐỊNH KỲ 5S.
+-- =========================================================
+local KickV3 = {
+    On = false,
+    Spawning = false,
+    Pallet = nil,
+    LastTargetRoot = nil,
 
-		HoverHeight   = 15,
-		OrbitRadius   = 8,
-		OrbitHeight   = 5,
-		OrbitSpeed    = 2.2,
-		PullRange     = 30,
-		LagStrength   = 11,
-		RagdollSpam   = true,
-		LineLagSpam   = true,
-		BodyPositionD = 800,
-		SpinTime      = math.huge,
-	}
+    -- Cơ chế cũ
+    LiftDistance     = 10,
+    LiftHeightOffset = 2,
+    FlipUpsideDown   = true,
+    RagdollInNK      = true,
+    PullRange        = 25,
+    LagStrength      = 11,
 
-	-- Dùng getter để tránh capture nil lúc define
-	local function kv3Get(name)
-		local env = getfenv and getfenv(0) or _G
-		-- Fallback: đọc trực tiếp qua bảng toàn cục Main
-		return rawget(_G, name) or rawget(shared, name)
-	end
+    RagdollSpam      = true,
+    EnableLineLag    = true,
+    LagInterval      = 0.05,
+    PCLDDetection    = true,
+    PCLDName         = "PlayerCharacterLocationDetector",
+    PCLDAltName      = "FirePlayerPart",
+    DropWaitTime     = 5.0,
+    DropHeight       = 40,
+    PCLDTolerance    = 6,
 
-	local function kv3Remotes()
-		local ge = game:GetService("ReplicatedStorage"):FindFirstChild("GrabEvents")
-		local ce = game:GetService("ReplicatedStorage"):FindFirstChild("CharacterEvents")
-		local mt = game:GetService("ReplicatedStorage"):FindFirstChild("MenuToys")
-		return {
-			SNO        = ge and ge:FindFirstChild("SetNetworkOwner"),
-			CreateLine = ge and ge:FindFirstChild("CreateGrabLine"),
-			DestroyLine= ge and ge:FindFirstChild("DestroyGrabLine"),
-			Ragdoll    = ce and ce:FindFirstChild("RagdollRemote"),
-		}
-	end
+    PalletRagdoll    = true,
+    PalletName       = "PalletLightBrown",
+    PalletSpawnTimeout = 3,
+    PalletImpactSpeed = 9999,
+    PalletImpactHold  = 0.15,
 
-	local function kv3Char(player)
-		player = player or game:GetService("Players").LocalPlayer
-		local char = player.Character
-		if not char then return nil end
-		local root = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		return char, root, hum
-	end
+    -- ===== PALLET: DƯỚI ĐẤT 20 STUD + TP LÊN XUỐNG + RAGDOLL =====
+    PalletGroundOffset  = 20,
+    PalletTPUpOffset    = 10,
+    PalletTPDownOffset  = 25,
+    PalletTPInterval    = 0.05,
+    PalletTPHoldUp      = 0.05,
+    PalletImpactCount   = 10,
+    PalletRagdollInterval = 5.0,
+    PalletRagdollForce    = 1,
 
-	local function kv3LineLag()
-		local R = kv3Remotes()
-		if not R.CreateLine then return end
-		local anchor = workspace:FindFirstChild("SpawnLocation")
-		local lp = game:GetService("Players").LocalPlayer
-		if not anchor and lp.Character then
-			anchor = lp.Character:FindFirstChild("HumanoidRootPart")
-		end
-		if not anchor then return end
-		local n = -2 ^ (20 + (KickV3.LagStrength or 11))
-		pcall(function()
-			R.CreateLine:FireServer(anchor, CFrame.new(n, 0, n))
-		end)
-	end
+    SpinRadius       = 6,
+    SpinSpeed        = 18,
+    SpinHeight       = 5,
+    HoldTime         = 0.6,
+    RagdollSpamTime  = 0.15,
 
-	local function kv3Ragdoll(targetRoot)
-		local R = kv3Remotes()
-		if not R.Ragdoll then return end
-		if targetRoot and targetRoot.Parent then
-			pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end)
-		end
-	end
+    RagdollSpamChannels = 2,
+    RagdollSpamPerTick  = 3,
+    EnforceRootLock     = true,
+    DisableJump         = true,
 
-	local function kv3GroundY(targetRoot, targetChar)
-		local params = RaycastParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		params.FilterDescendantsInstances = { targetChar, game:GetService("Players").LocalPlayer.Character }
-		local hit = workspace:Raycast(targetRoot.Position, Vector3.new(0, -300, 0), params)
-		return hit and hit.Position.Y or (targetRoot.Position.Y - 3)
-	end
+    -- ===== MỚI 100% — MAX SETTING =====
+    GrabWatchdogInterval = 0.02,
+    GrabRegrabCooldown   = 0.05,
+    TargetFrontDistance  = 15,
+    TargetFrontHeight    = 15,
+    NoPingMode           = true,
+    SNOFireInterval      = 0.05,
+    RagdollFireInterval  = 0.1,
+    PCLDLockEnabled      = true,
+    PCLDLiftOffset       = 10,
+    PCLDForcePriority    = 999,
+    PCLDAntiDestroy      = true,
+    PCLDAntiReparent     = true,
+    PCLDForceCFrame      = true,
+    PCLDToleranceLock    = 2,
+    PCLDNudgeInterval    = 0.1,
+}
 
-	local function kv3LockBP(targetRoot, groundY)
-		local bp = targetRoot:FindFirstChild("KickV3BP")
-		if not bp then
-			bp = Instance.new("BodyPosition")
-			bp.Name     = "KickV3BP"
-			bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-			bp.P        = 1e6
-			bp.D        = KickV3.BodyPositionD
-			bp.Parent   = targetRoot
-		end
-		bp.Position = Vector3.new(targetRoot.Position.X, groundY + KickV3.HoverHeight, targetRoot.Position.Z)
-	end
+-- ===== Remotes =====
+local function kv3Remotes()
+    local ge = game:GetService("ReplicatedStorage"):FindFirstChild("GrabEvents")
+    local ce = game:GetService("ReplicatedStorage"):FindFirstChild("CharacterEvents")
+    local mt = game:GetService("ReplicatedStorage"):FindFirstChild("MenuToys")
+    return {
+        SNO         = ge and ge:FindFirstChild("SetNetworkOwner"),
+        CreateLine  = ge and ge:FindFirstChild("CreateGrabLine"),
+        DestroyLine = ge and ge:FindFirstChild("DestroyGrabLine"),
+        Ragdoll     = ce and ce:FindFirstChild("RagdollRemote"),
+        SpawnToy    = mt and mt:FindFirstChild("SpawnToyRemoteFunction"),
+        DestroyToy  = mt and mt:FindFirstChild("DestroyToy"),
+    }
+end
 
-	local function kv3Cleanup(plr)
-		local char, root = kv3Char(plr)
-		if root then
-			local bp = root:FindFirstChild("KickV3BP")
-			if bp then pcall(bp.Destroy, bp) end
-			local R = kv3Remotes()
-			if R.DestroyLine then pcall(function() R.DestroyLine:FireServer(root) end) end
-		end
-		if char then
-			local torso = char:FindFirstChild("Torso")
-			if torso then
-				local av = torso:FindFirstChild("KickV3AV")
-				if av then pcall(av.Destroy, av) end
-			end
-		end
-	end
+local function kv3Char(player)
+    player = player or game:GetService("Players").LocalPlayer
+    local char = player.Character
+    if not char then return nil end
+    local root = char:FindFirstChild("realHrp") or char:FindFirstChild("HumanoidRootPart")
+    local hum  = char:FindFirstChildOfClass("Humanoid")
+    return char, root, hum
+end
 
-	local function kv3FindTarget(selected)
-		for key, on in pairs(selected or {}) do
-			if on then
-				local plr = typeof(key) == "Instance" and key
-					or game:GetService("Players"):FindFirstChild(tostring(key))
-				if plr and plr:IsA("Player") and plr ~= game:GetService("Players").LocalPlayer then
-					local char, root, hum = kv3Char(plr)
-					if root and hum and hum.Health > 0 then
-						return plr, char, root, hum
-					end
-				end
-			end
-		end
-		return nil
-	end
+-- ===== PCDL helpers =====
+local function kv3FindPCLD(char)
+    if not char then return nil end
+    local pcld = char:FindFirstChild(KickV3.PCLDName) or char:FindFirstChild(KickV3.PCLDAltName)
+    if not pcld then
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            pcld = root:FindFirstChild(KickV3.PCLDName) or root:FindFirstChild(KickV3.PCLDAltName)
+        end
+    end
+    return pcld
+end
 
-	-- Main loop
-	local function kv3Run(selected, tick_
-)
-		local startTime = os.clock()
-		local angle = 0
-		local last = os.clock()
-		local lastRag, lastLag = 0, 0
-		local lastTarget = nil
+local function kv3IsPCLDFollowing(targetChar, targetRoot, pcld)
+    if not (targetRoot and targetRoot.Parent and pcld and pcld.Parent) then
+        return false
+    end
+    return (pcld.Position - targetRoot.Position).Magnitude <= KickV3.PCLDTolerance
+end
 
-		while KickV3.On and not tick_.flag11() do
-			local target, targetChar, targetRoot, targetHum = kv3FindTarget(selected)
-			if not target then
-				if lastTarget then kv3Cleanup(lastTarget) end
-				break
-			end
-			lastTarget = target
+local function kv3NudgePCLD(pcld, lockPos)
+    if not pcld or not pcld.Parent then return end
+    local R = kv3Remotes()
+    if R.CreateLine then
+        pcall(function() R.CreateLine:FireServer(pcld, CFrame.new(lockPos)) end)
+    end
+    if R.SNO then
+        pcall(function() R.SNO:FireServer(pcld, CFrame.new(lockPos)) end)
+    end
+    if KickV3.PCLDForceCFrame then
+        pcall(function() pcld.CFrame = CFrame.new(lockPos) end)
+    end
+end
 
-			if not targetRoot.Parent or not targetHum.Parent or targetHum.Health <= 0 then
-				break
-			end
-			if os.clock() - startTime > KickV3.SpinTime then
-				break
-			end
+-- ===== HARD LOCK PCDL =====
+local function kv3HardLockPCLD(pcld, getTargetPos, getTargetBG, stopSignal)
+    if not pcld or not pcld.Parent then return end
+    local RunService = game:GetService("RunService")
 
-			local myChar, myRoot, myHum = kv3Char()
-			if not myRoot or not myHum or myHum.Health <= 0 then
-				break
-			end
+    if setpriority then
+        pcall(setpriority, pcld, KickV3.PCLDForcePriority)
+    end
 
-			local now = os.clock()
-			local dt = now - last
-			last = now
-			angle = (angle + KickV3.OrbitSpeed * dt) % (math.pi * 2)
+    if KickV3.PCLDAntiReparent then
+        pcld.AncestryChanged:Connect(function()
+            if not KickV3.On or stopSignal() then return end
+            if pcld.Parent == nil then
+                pcall(function()
+                    local root = KickV3.LastTargetRoot
+                    if root and root.Parent then
+                        pcld.Parent = root.Parent
+                    end
+                end)
+            end
+        end)
+    end
 
-			-- TARGET: grab + khóa vị trí + ragdoll loop
-			local groundY = kv3GroundY(targetRoot, targetChar)
+    if KickV3.PCLDAntiDestroy then
+        pcld.Destroying:Connect(function()
+            task.wait(0.01)
+            if not KickV3.On or stopSignal() then return end
+            local root = KickV3.LastTargetRoot
+            if root and root.Parent then
+                local newPCLD = Instance.new("Folder")
+                newPCLD.Name = KickV3.PCLDName
+                newPCLD.Parent = root.Parent
+                kv3HardLockPCLD(newPCLD, getTargetPos, getTargetBG, stopSignal)
+            end
+        end)
+    end
 
-			if not tick_.isPartOwner(targetRoot) then
-				pcall(tick_.SNO, targetRoot, 0.3)
-			end
-			-- Grab spam liên tục để giữ owner
-			local lockPos = Vector3.new(targetRoot.Position.X, groundY + KickV3.HoverHeight, targetRoot.Position.Z)
-			pcall(tick_.Grab, targetRoot, CFrame.new(lockPos))
+    task.spawn(function()
+        while KickV3.On and not stopSignal() and pcld.Parent do
+            local lockPos = getTargetPos()
+            local targetBG = getTargetBG()
 
-			kv3LockBP(targetRoot, groundY)
+            local pBP = pcld:FindFirstChild("KickV3PCLDBP")
+            if not pBP or not pBP.Parent then
+                pBP = Instance.new("BodyPosition")
+                pBP.Name = "KickV3PCLDBP"
+                pBP.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                pBP.P = 1e6
+                pBP.D = 1000
+                pBP.Parent = pcld
+            end
+            pBP.Position = lockPos
 
-			if KickV3.RagdollSpam and now - lastRag >= 0.03 then
-				lastRag = now
-				kv3Ragdoll(targetRoot)
-			end
+            local pBG = pcld:FindFirstChild("KickV3PCLDBG")
+            if not pBG or not pBG.Parent then
+                pBG = Instance.new("BodyGyro")
+                pBG.Name = "KickV3PCLDBG"
+                pBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                pBG.D = 1000
+                pBG.Parent = pcld
+            end
+            if targetBG then pBG.CFrame = targetBG.CFrame end
 
-			-- PLAYER: xoay quanh target
-			local tpos = lockPos
-			local orbitPos = Vector3.new(
-				tpos.X + math.cos(angle) * KickV3.OrbitRadius,
-				tpos.Y + KickV3.OrbitHeight,
-				tpos.Z + math.sin(angle) * KickV3.OrbitRadius
-			)
-			myRoot.CFrame = CFrame.lookAt(orbitPos, tpos)
-			myRoot.AssemblyLinearVelocity  = Vector3.zero
-			myRoot.AssemblyAngularVelocity = Vector3.zero
+            if KickV3.PCLDForceCFrame then
+                if (pcld.Position - lockPos).Magnitude > KickV3.PCLDToleranceLock then
+                    pcall(function() pcld.CFrame = CFrame.new(lockPos) end)
+                end
+            end
 
-			if KickV3.LineLagSpam and now - lastLag >= 0.03 then
-				lastLag = now
-				kv3LineLag()
-			end
+            if setpriority then
+                pcall(setpriority, pcld, KickV3.PCLDForcePriority)
+            end
 
-			RunService.Heartbeat:Wait()
-		end
+            RunService.Heartbeat:Wait()
+        end
 
-		for key, _ in pairs(selected or {}) do
-			local plr = typeof(key) == "Instance" and key
-				or game:GetService("Players"):FindFirstChild(tostring(key))
-			if plr then kv3Cleanup(plr) end
-		end
-		if lastTarget then kv3Cleanup(lastTarget) end
-	end
+        for _, n in ipairs({"KickV3PCLDBP", "KickV3PCLDBG"}) do
+            local o = pcld:FindFirstChild(n)
+            if o then pcall(o.Destroy, o) end
+        end
+    end)
+end
 
-	-- Adapter: nhận các API cần thiết qua bảng để tránh capture nil
-	local KickV3Runtime = {
-		flag11    = function() return false end,
-		SNO       = function() end,
-		Grab      = function() end,
-		isPartOwner = function() return false end,
-	}
+-- ===== Owner check =====
+local function kv3IsOwner(part)
+    if not part or not part:IsA("BasePart") or not part.Parent then return false end
+    local lpName = game:GetService("Players").LocalPlayer.Name
+    local parent = part.Parent
+    local head = part.Name == "HumanoidRootPart" and parent:FindFirstChild("Head")
+    head = head and head:FindFirstChild("PartOwner")
+    if head and head.Value == lpName then return true end
+    local po = part:FindFirstChild("PartOwner")
+    if po and po.Value == lpName then return true end
+    local p2 = parent and parent:FindFirstChild("PartOwner", true)
+    return p2 and p2.Value == lpName
+end
 
-	-- Hàm được gọi từ ProcessPlayer / Target UI
-	local function KickV3Start()
-		if KickV3.On then return end
-		KickV3.On = true
-		KickV3.LagOn = true
-		if KickV3Runtime.notify then
-			KickV3Runtime.notify("Kick V3 ON — target locked 15 studs, orbiting + ragdoll loop", "Target")
-		end
-		task.spawn(function()
-			local ok, err = pcall(kv3Run, tbl7 and tbl7.SelectedPlayers or {}, KickV3Runtime)
-			KickV3.On = false
-			KickV3.LagOn = false
-			if not ok and err then
-				warn("[Kick V3] " .. tostring(err))
-			end
-		end)
-	end
+local function kv3Grab(part, overrideCF)
+    local char, root, hum = kv3Char()
+    if not root or not hum or hum.Health == 0 or not part or not part.Parent or not part:IsA("BasePart") then return end
+    local base = (overrideCF or root.CFrame) * CFrame.new(0, 1.593, 0)
+    local cf = CFrame.new(base.Position, part.Position)
+    local R = kv3Remotes()
+    if R.SNO then R.SNO:FireServer(part, cf) end
+end
 
-	local function KickV3Stop()
-		KickV3.On = false
-		KickV3.LagOn = false
-		if tbl7 and tbl7.SelectedPlayers then
-			for key, _ in pairs(tbl7.SelectedPlayers) do
-				local plr = typeof(key) == "Instance" and key
-					or game:GetService("Players"):FindFirstChild(tostring(key))
-				if plr then kv3Cleanup(plr) end
-			end
-		end
-	end
+-- ===== Line Lag =====
+local function kv3LineLag()
+    if not KickV3.EnableLineLag then return end
+    local R = kv3Remotes()
+    if not R.CreateLine then return end
+    local lp = game:GetService("Players").LocalPlayer
+    local anchor = workspace:FindFirstChild("SpawnLocation") or (lp.Character and lp.Character:FindFirstChild("HumanoidRootPart"))
+    if not anchor then return end
+    local n = -2 ^ (20 + (KickV3.LagStrength or 11))
+    pcall(function() R.CreateLine:FireServer(anchor, CFrame.new(n, 0, n)) end)
+end
 
-	local function KickV3Sync()
-		if not tbl7 or not tbl8 then return end
-		local methods = tbl7.TargetMethods
-		local loopOn  = tbl8.LoopApplyMethodT == true
-		if methods and methods["Kick V3"] and loopOn and not KickV3Runtime.flag11() then
-			KickV3Start()
-		else
-			KickV3Stop()
-		end
-	end
-	-- =========================================================
-	-- END KICK V3 MODULE
-	-- =========================================================
-	do
+-- ===== Pallet =====
+local function kv3DestroyPallet()
+    local pallet = KickV3.Pallet
+    if pallet and pallet.Parent then
+        local R = kv3Remotes()
+        if R.DestroyToy then
+            pcall(function() R.DestroyToy:FireServer(pallet) end)
+        end
+        pcall(function() pallet:Destroy() end)
+    end
+    KickV3.Pallet = nil
+end
+
+local function kv3CreatePallet(targetRoot)
+    if not KickV3.PalletRagdoll then return nil end
+    if KickV3.Spawning then return KickV3.Pallet end
+    if KickV3.Pallet and KickV3.Pallet.Parent then return KickV3.Pallet end
+
+    KickV3.Spawning = true
+    local R = kv3Remotes()
+    local char, root = kv3Char()
+    if not root or not R.SpawnToy or not targetRoot then
+        KickV3.Spawning = false
+        return nil
+    end
+
+    pcall(function()
+        local lp = game:GetService("Players").LocalPlayer
+        local n = 0
+        while lp:FindFirstChild("InPlot") and lp.InPlot.Value
+            and lp:FindFirstChild("InOwnedPlot") and not lp.InOwnedPlot.Value
+            and n < 30 do
+            task.wait(0.1)
+            n = n + 1
+        end
+        n = 0
+        while lp:FindFirstChild("CanSpawnToy") and not lp.CanSpawnToy.Value and n < 30 do
+            task.wait(0.1)
+            n = n + 1
+        end
+    end)
+
+    local groundPos = targetRoot.Position - Vector3.new(0, KickV3.PalletGroundOffset, 0)
+    local cf = CFrame.new(groundPos)
+    local lp = game:GetService("Players").LocalPlayer
+    local folder = workspace:FindFirstChild(lp.Name .. "SpawnedInToys") or workspace
+    local found = nil
+    local conn = folder.ChildAdded:Connect(function(ch)
+        if ch.Name == KickV3.PalletName or ch.Name == "RagdollPalete" then
+            found = ch
+        end
+    end)
+
+    pcall(function()
+        R.SpawnToy:InvokeServer(KickV3.PalletName, cf, Vector3.zero)
+    end)
+
+    local t0 = tick()
+    repeat task.wait(0.05) until found or (tick() - t0) > KickV3.PalletSpawnTimeout
+    conn:Disconnect()
+
+    if not found then
+        KickV3.Spawning = false
+        return nil
+    end
+
+    local sound = found:FindFirstChild("SoundPart") or found:FindFirstChildWhichIsA("BasePart", true)
+    if not sound then
+        pcall(function() found:Destroy() end)
+        KickV3.Spawning = false
+        return nil
+    end
+
+    if R.SNO then
+        for _ = 1, 12 do
+            if not KickV3.On then break end
+            pcall(function() R.SNO:FireServer(sound, sound.CFrame) end)
+            task.wait()
+            if sound:FindFirstChild("PartOwner") then break end
+        end
+    end
+
+    for _, d in ipairs(found:GetDescendants()) do
+        if d:IsA("BasePart") then
+            d.CanCollide = false
+            d.CanQuery = false
+        end
+    end
+    found.Name = "RagdollPalete"
+
+    local bv = sound:FindFirstChild("KickV3PalletBV") or Instance.new("BodyVelocity")
+    bv.Name = "KickV3PalletBV"
+    bv.MaxForce = Vector3.new(0, math.huge, 0)
+    bv.Velocity = Vector3.zero
+    bv.Parent = sound
+
+    local bp = sound:FindFirstChild("KickV3PalletGroundBP") or Instance.new("BodyPosition")
+    bp.Name = "KickV3PalletGroundBP"
+    bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bp.P = 1e6
+    bp.D = 1000
+    bp.Position = groundPos
+    bp.Parent = sound
+
+    KickV3.Pallet = found
+    KickV3.Spawning = false
+    return found
+end
+
+-- ===== PALLET IMPACT: TP LÊN XUỐNG =====
+local function kv3PalletImpact(targetRoot, targetChar, targetPos)
+    if not KickV3.RagdollSpam or not KickV3.PalletRagdoll then return end
+    local pallet = kv3CreatePallet(targetRoot)
+    if not pallet or not pallet.Parent then return end
+
+    local sound = pallet:FindFirstChild("SoundPart")
+    if not (sound and sound.Parent) then return end
+
+    local R = kv3Remotes()
+    local RunService = game:GetService("RunService")
+    local groundBP = sound:FindFirstChild("KickV3PalletGroundBP")
+
+    local function getUpPos()
+        return targetRoot.Position + Vector3.new(0, KickV3.PalletTPUpOffset, 0)
+    end
+    local function getDownPos()
+        return targetRoot.Position - Vector3.new(0, KickV3.PalletTPDownOffset, 0)
+    end
+
+    for i = 1, KickV3.PalletImpactCount do
+        if not KickV3.On or not pallet.Parent or not targetRoot.Parent then break end
+
+        -- TP LÊN
+        local upPos = getUpPos()
+        pcall(function() pallet:PivotTo(CFrame.new(upPos)) end)
+        if groundBP then groundBP.Position = upPos end
+
+        local bv = sound:FindFirstChild("KickV3PalletBV")
+        if bv then bv.Velocity = Vector3.new(0, KickV3.PalletImpactSpeed, 0) end
+        pcall(function()
+            sound.AssemblyLinearVelocity = Vector3.new(0, KickV3.PalletImpactSpeed, 0)
+        end)
+
+        if R.SNO then pcall(function() R.SNO:FireServer(sound, sound.CFrame) end) end
+        if R.Ragdoll then pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end) end
+
+        local holdStart = os.clock()
+        while os.clock() - holdStart < KickV3.PalletTPHoldUp do
+            if not KickV3.On or not pallet.Parent or not targetRoot.Parent then break end
+            RunService.Heartbeat:Wait()
+        end
+
+        -- TP XUỐNG
+        local downPos = getDownPos()
+        pcall(function() pallet:PivotTo(CFrame.new(downPos)) end)
+        if groundBP then groundBP.Position = downPos end
+
+        if bv then bv.Velocity = Vector3.new(0, -KickV3.PalletImpactSpeed, 0) end
+        pcall(function()
+            sound.AssemblyLinearVelocity = Vector3.new(0, -KickV3.PalletImpactSpeed, 0)
+        end)
+
+        if R.SNO then pcall(function() R.SNO:FireServer(sound, sound.CFrame) end) end
+        if R.Ragdoll then pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end) end
+
+        local waitStart = os.clock()
+        while os.clock() - waitStart < KickV3.PalletTPInterval do
+            if not KickV3.On or not pallet.Parent or not targetRoot.Parent then break end
+            RunService.Heartbeat:Wait()
+        end
+    end
+
+    if pallet.Parent then
+        local finalPos = targetRoot.Position - Vector3.new(0, KickV3.PalletGroundOffset, 0)
+        pcall(function() pallet:PivotTo(CFrame.new(finalPos)) end)
+        if groundBP then groundBP.Position = finalPos end
+        if sound.Parent then
+            local bv = sound:FindFirstChild("KickV3PalletBV")
+            if bv then bv.Velocity = Vector3.zero end
+        end
+    end
+end
+
+-- ===== PALLET RAGDOLL — GỌI ĐA KÊNH =====
+local function kv3PalletRagdollTick(targetRoot, targetHum, targetChar)
+    if not targetRoot or not targetRoot.Parent then return end
+    if not targetHum or not targetHum.Parent then return end
+
+    local R = kv3Remotes()
+
+    -- 1) RagdollRemote (nhiều signature)
+    if R.Ragdoll then
+        pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end)
+        pcall(function() R.Ragdoll:FireServer(targetRoot, KickV3.PalletRagdollForce) end)
+        pcall(function() R.Ragdoll:FireServer(targetHum, 0) end)
+    end
+
+    -- 2) Humanoid state
+    pcall(function()
+        targetHum:ChangeState(Enum.HumanoidStateType.Physics)
+    end)
+    pcall(function()
+        targetHum:ChangeState(Enum.HumanoidStateType.FallingDown)
+    end)
+
+    -- 3) PlatformStand
+    pcall(function()
+        targetHum.PlatformStand = true
+    end)
+
+    -- 4) Ép BP rơi
+    pcall(function()
+        local bp = targetRoot:FindFirstChild("KickV3BP")
+        if bp then
+            bp.Position = targetRoot.Position + Vector3.new(0, 50, 0)
+        end
+    end)
+
+    -- 5) SNO
+    if R.SNO then
+        pcall(function() R.SNO:FireServer(targetRoot, targetRoot.CFrame) end)
+    end
+end
+
+-- ===== Ragdoll spam (throttled) =====
+local function kv3SpamRagdoll(targetRoot, stopSignal, lastRagdollRef)
+    local R = kv3Remotes()
+    if not R.Ragdoll then return end
+    local RunService = game:GetService("RunService")
+
+    task.spawn(function()
+        while KickV3.On and not stopSignal() do
+            if not targetRoot.Parent then break end
+            local now = os.clock()
+            if now - lastRagdollRef.value >= KickV3.RagdollFireInterval then
+                lastRagdollRef.value = now
+                for _ = 1, KickV3.RagdollSpamPerTick do
+                    pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end)
+                end
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+end
+
+-- ===== Hard-lock root =====
+local function kv3HardLockRoot(targetRoot, targetHum, getTargetPos, stopSignal)
+    if not targetRoot or not targetRoot.Parent then return end
+    local RunService = game:GetService("RunService")
+
+    task.spawn(function()
+        while KickV3.On and not stopSignal() do
+            if not targetRoot.Parent or not targetHum.Parent then break end
+
+            if KickV3.DisableJump and targetHum then
+                pcall(function()
+                    if targetHum:GetStateEnabled(Enum.HumanoidStateType.Jumping) then
+                        targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+                    end
+                end)
+            end
+
+            local targetPos = getTargetPos()
+
+            if KickV3.EnforceRootLock then
+                local bp = targetRoot:FindFirstChild("KickV3BP")
+                if not bp then
+                    bp = Instance.new("BodyPosition")
+                    bp.Name = "KickV3BP"
+                    bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bp.P = 1000000
+                    bp.D = 1000
+                    bp.Parent = targetRoot
+                end
+                bp.Position = targetPos
+
+                if (targetRoot.Position - targetPos).Magnitude > 3 then
+                    pcall(function()
+                        targetRoot.CFrame = CFrame.new(targetPos)
+                    end)
+                end
+            end
+
+            RunService.Heartbeat:Wait()
+        end
+
+        if KickV3.DisableJump and targetHum and targetHum.Parent then
+            pcall(function()
+                targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+            end)
+        end
+    end)
+end
+
+-- ===== Cleanup =====
+local function kv3Cleanup(plr)
+    local char, root = kv3Char(plr)
+    if root then
+        for _, child in ipairs(root:GetChildren()) do
+            if child.Name == "KickV3BP" or child.Name == "KickV3BG" then
+                pcall(child.Destroy, child)
+            end
+        end
+    end
+    if char then
+        local pcld = kv3FindPCLD(char)
+        if pcld then
+            for _, name in ipairs({"KickV3PCLDBP", "KickV3PCLDBG"}) do
+                local obj = pcld:FindFirstChild(name)
+                if obj then pcall(obj.Destroy, obj) end
+            end
+        end
+        local R = kv3Remotes()
+        if R.DestroyLine and root then
+            pcall(function() R.DestroyLine:FireServer(root) end)
+        end
+    end
+end
+
+local function kv3FindTarget(selected)
+    for key, on in pairs(selected or {}) do
+        if on then
+            local plr = typeof(key) == "Instance" and key or game:GetService("Players"):FindFirstChild(tostring(key))
+            if plr and plr:IsA("Player") and plr ~= game:GetService("Players").LocalPlayer then
+                local char, root, hum = kv3Char(plr)
+                if root and hum and hum.Health > 0 then
+                    return plr, char, root, hum
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- =========================================================
+-- MAIN LOOP
+-- =========================================================
+local function kv3Run(selected, tick_)
+    local RunService = game:GetService("RunService")
+    local Players = game:GetService("Players")
+
+    local lastTarget  = nil
+    local hasGrabbed  = false
+    local lastRegrab  = 0
+    local lastSNO     = 0
+    local lastLag     = 0
+
+    local pcldState = {
+        grabbedAt      = 0,
+        dropped        = false,
+        lastNudge      = 0,
+        palletImpacted = false,
+        hardLockStarted = false,
+        firstRagdollDone = false,
+    }
+
+    local hardLockStarted = false
+    local lastRagdollRef  = { value = 0 }
+    local lastPalletRagdoll = 0
+
+    local function computeFrontPos(myRoot)
+        return myRoot.Position
+            + myRoot.CFrame.LookVector * KickV3.TargetFrontDistance
+            + Vector3.new(0, KickV3.TargetFrontHeight, 0)
+    end
+
+    local function ensureGrabbed(targetRoot, myRoot, now)
+        if now - lastRegrab < KickV3.GrabRegrabCooldown then return end
+        local R = kv3Remotes()
+        if not R.SNO then return end
+
+        if kv3IsOwner(targetRoot) then
+            hasGrabbed = true
+            return
+        end
+
+        hasGrabbed = false
+        local cf = CFrame.new(
+            myRoot.Position + myRoot.CFrame.LookVector * 2 + Vector3.new(0, 1.593, 0),
+            targetRoot.Position
+        )
+        pcall(function() R.SNO:FireServer(targetRoot, cf) end)
+        lastRegrab = now
+    end
+
+    while KickV3.On and not tick_.flag11() do
+        local target, targetChar, targetRoot, targetHum = kv3FindTarget(selected)
+        if not target then
+            if lastTarget then kv3Cleanup(lastTarget) end
+            kv3DestroyPallet()
+            break
+        end
+
+        if lastTarget ~= target then
+            if lastTarget then kv3Cleanup(lastTarget) end
+            kv3DestroyPallet()
+            hasGrabbed = false
+            hardLockStarted = false
+            lastRegrab = 0
+            lastPalletRagdoll = 0
+            pcldState.grabbedAt       = 0
+            pcldState.dropped         = false
+            pcldState.lastNudge       = 0
+            pcldState.palletImpacted  = false
+            pcldState.hardLockStarted = false
+            pcldState.firstRagdollDone = false
+        end
+
+        lastTarget = target
+        KickV3.LastTargetRoot = targetRoot
+
+        if not targetRoot.Parent or not targetHum.Parent or targetHum.Health <= 0 then break end
+
+        local myChar, myRoot, myHum = kv3Char()
+        if not myRoot or not myHum or myHum.Health <= 0 then break end
+
+        local now = os.clock()
+        local R = kv3Remotes()
+        local pcld = kv3FindPCLD(targetChar)
+
+        -- Pull range
+        local dist = (myRoot.Position - targetRoot.Position).Magnitude
+        if dist > KickV3.PullRange then
+            local saved = myRoot.CFrame
+            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 2)
+            if R.SNO then
+                for _ = 1, 5 do
+                    if not KickV3.On then break end
+                    pcall(function() R.SNO:FireServer(targetRoot, targetRoot.CFrame) end)
+                    task.wait()
+                end
+            end
+            if myRoot.Parent then myRoot.CFrame = saved end
+        end
+
+        -- Grab watchdog
+        ensureGrabbed(targetRoot, myRoot, now)
+
+        if not hasGrabbed then
+            RunService.Heartbeat:Wait()
+            continue
+        end
+
+        local frontPos = computeFrontPos(myRoot)
+
+        local function getTargetPos()
+            return frontPos + Vector3.new(0, KickV3.PCLDLiftOffset, 0)
+        end
+        local function getTargetBG()
+            return targetRoot:FindFirstChild("KickV3BG")
+        end
+
+        -- Ragdoll spam
+        if KickV3.RagdollSpam and now - lastRagdollRef.value >= KickV3.RagdollFireInterval then
+            lastRagdollRef.value = now
+            if R.Ragdoll then
+                for _ = 1, KickV3.RagdollSpamPerTick do
+                    pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end)
+                end
+            end
+        end
+        if KickV3.RagdollInNK and R.Ragdoll then
+            pcall(function() R.Ragdoll:FireServer(targetRoot, 0) end)
+        end
+
+        -- Pallet
+        if KickV3.RagdollSpam and KickV3.PalletRagdoll and not pcldState.dropped then
+            if not pcldState.palletImpacted then
+                pcldState.palletImpacted = true
+                task.spawn(function()
+                    kv3PalletImpact(targetRoot, targetChar, frontPos)
+                end)
+            else
+                local pallet = KickV3.Pallet
+                if pallet and pallet.Parent then
+                    local groundPos = targetRoot.Position - Vector3.new(0, KickV3.PalletGroundOffset, 0)
+                    pcall(function() pallet:PivotTo(CFrame.new(groundPos)) end)
+                    local sound = pallet:FindFirstChild("SoundPart")
+                    if sound and sound.Parent then
+                        local groundBP = sound:FindFirstChild("KickV3PalletGroundBP")
+                        if groundBP then groundBP.Position = groundPos end
+                        if now - lastSNO >= KickV3.SNOFireInterval then
+                            lastSNO = now
+                            pcall(function() R.SNO:FireServer(sound, sound.CFrame) end)
+                        end
+                    end
+                else
+                    pcldState.palletImpacted = false
+                end
+            end
+        end
+
+        -- ===== PALLET RAGDOLL: LẦN ĐẦU KHI GRAB + 5S ĐỊNH KỲ =====
+        if KickV3.PalletRagdoll then
+            -- Lần đầu grab -> ragdoll ngay
+            if not pcldState.firstRagdollDone and hasGrabbed then
+                pcldState.firstRagdollDone = true
+                lastPalletRagdoll = now
+                task.spawn(function()
+                    local waitStart = os.clock()
+                    while KickV3.On and not pcldState.palletImpacted and os.clock() - waitStart < 3 do
+                        RunService.Heartbeat:Wait()
+                    end
+                    if KickV3.On then
+                        kv3PalletRagdollTick(targetRoot, targetHum, targetChar)
+                    end
+                end)
+            end
+
+            -- Định kỳ 5s
+            if pcldState.firstRagdollDone and now - lastPalletRagdoll >= KickV3.PalletRagdollInterval then
+                lastPalletRagdoll = now
+                kv3PalletRagdollTick(targetRoot, targetHum, targetChar)
+            end
+        end
+
+        -- PCDL
+        if KickV3.PCLDDetection and pcld then
+            local following = kv3IsPCLDFollowing(targetChar, targetRoot, pcld)
+            if following then
+                pcldState.dropped = false
+                pcldState.grabbedAt = now
+            else
+                if KickV3.PCLDLockEnabled and not pcldState.hardLockStarted then
+                    pcldState.hardLockStarted = true
+                    kv3HardLockPCLD(pcld, getTargetPos, getTargetBG, function()
+                        return pcldState.dropped or not hasGrabbed or not KickV3.On
+                    end)
+                end
+                if now - pcldState.lastNudge >= KickV3.PCLDNudgeInterval then
+                    pcldState.lastNudge = now
+                    kv3NudgePCLD(pcld, getTargetPos())
+                end
+            end
+        end
+
+        if not pcldState.dropped then
+            local targetBP = targetRoot:FindFirstChild("KickV3BP")
+            if not targetBP then
+                targetBP = Instance.new("BodyPosition")
+                targetBP.Name = "KickV3BP"
+                targetBP.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                targetBP.P = 1000000
+                targetBP.D = 1000
+                targetBP.Parent = targetRoot
+            end
+            targetBP.Position = frontPos
+
+            local targetBG = targetRoot:FindFirstChild("KickV3BG")
+            if not targetBG then
+                targetBG = Instance.new("BodyGyro")
+                targetBG.Name = "KickV3BG"
+                targetBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                targetBG.D = 1000
+                targetBG.Parent = targetRoot
+            end
+
+            if KickV3.FlipUpsideDown then
+                local look = myRoot.CFrame.LookVector
+                local upFlipped = -myRoot.CFrame.UpVector
+                targetBG.CFrame = CFrame.lookAt(frontPos, frontPos + look, upFlipped)
+            else
+                targetBG.CFrame = CFrame.lookAt(frontPos, frontPos + myRoot.CFrame.LookVector, myRoot.CFrame.UpVector)
+            end
+
+            if not hardLockStarted then
+                hardLockStarted = true
+                kv3HardLockRoot(targetRoot, targetHum, function() return frontPos end, function()
+                    return pcldState.dropped or not hasGrabbed or not KickV3.On
+                end)
+            end
+        end
+
+        -- Line lag
+        if KickV3.EnableLineLag and now - lastLag >= KickV3.LagInterval then
+            lastLag = now
+            kv3LineLag()
+        end
+
+        -- SNO throttle
+        if R.SNO and now - lastSNO >= KickV3.SNOFireInterval then
+            lastSNO = now
+            pcall(function() R.SNO:FireServer(targetRoot, targetRoot.CFrame) end)
+        end
+
+        RunService.Heartbeat:Wait()
+    end
+
+    for key in pairs(selected or {}) do
+        local plr = typeof(key) == "Instance" and key or Players:FindFirstChild(tostring(key))
+        if plr then kv3Cleanup(plr) end
+    end
+    if lastTarget then kv3Cleanup(lastTarget) end
+    kv3DestroyPallet()
+    KickV3.LastTargetRoot = nil
+end
+
+-- ===== Runtime / Start / Stop / Sync =====
+local KickV3Runtime = {
+    flag11 = function() return false end,
+    SNO = function() end,
+    Grab = function() end,
+    isPartOwner = kv3IsOwner,
+}
+
+local function KickV3Start()
+    if KickV3.On then return end
+    KickV3.On = true
+    task.spawn(function()
+        local ok, err = pcall(kv3Run, tbl7 and tbl7.SelectedPlayers or {}, KickV3Runtime)
+        KickV3.On = false
+        if not ok and err then warn("[Kick V3] " .. tostring(err)) end
+    end)
+end
+
+local function KickV3Stop()
+    KickV3.On = false
+    KickV3.LastTargetRoot = nil
+    if tbl7 and tbl7.SelectedPlayers then
+        for key, _ in pairs(tbl7.SelectedPlayers) do
+            local plr = typeof(key) == "Instance" and key or game:GetService("Players"):FindFirstChild(tostring(key))
+            if plr then kv3Cleanup(plr) end
+        end
+    end
+    kv3DestroyPallet()
+end
+
+local function KickV3Sync()
+    if not tbl7 or not tbl8 then return end
+    local methods = tbl7.TargetMethods
+    local loopOn  = tbl8.LoopApplyMethodT == true
+    if methods and methods["Kick V3"] and loopOn and not KickV3Runtime.flag11() then
+        KickV3Start()
+    else
+        KickV3Stop()
+    end
+end
+-- =========================================================
+-- END KICK V3 MODULE
+-- =========================================================
+
+    do
 		local placeId, now2, scriptKey, fallenPartsDestroyHeight, TextChatService, ContextActionService, GuiService, Stats2, Debris, TeleportService
 		local jobId, playerGui, isHeld, inPlot, inOwnedPlot, rbxGeneral, v20, highlight, v21
 
@@ -37868,11 +38387,11 @@ end
 			end,
 		})
 
-		-- ===== Anti Packet (flood / ping spike protection) =====
+		-- ===== Anti Packet (no ping: reacts to real packet/line lag offenders) =====
 		Antis:AddToggle("AntiPacket", {
 			Text = "Anti Packet",
 			Default = false,
-			Tooltip = "Watches your ping; on a packet flood it cleans effects/sounds and enables Anti Lag",
+			Tooltip = "Detects players who spam packets / line lag, then escalates: cleans effects, mutes sounds, enables Anti Lag, strips offenders' grab lines",
 			Callback = function(arg)
 				tbl12.SetRuntimeToggle("AntiPacket", arg)
 			end,
@@ -37884,87 +38403,68 @@ end
 			SyncToggleState = true,
 		})
 
-		-- Ngưỡng 3 mode (ms). Mục tiêu giữ ping trong khoảng 60-80ms.
-		Antis:AddSlider("AntiPacketM1", {
-			Text = "Anti Packet Mode 1 (>)",
-			Default = 80,
-			Min = 60,
-			Max = 120,
+		Antis:AddSlider("AntiPacketEscalate", {
+			Text = "Anti Packet Escalate After",
+			Default = 4,
+			Min = 1,
+			Max = 15,
 			Rounding = 0,
-			Suffix = " ms",
-			Tooltip = "Target ping to activate mode 1",
+			Suffix = " s",
+			Tooltip = "How long one offender must keep flooding before the next mode kicks in (lower = more aggressive)",
 			Callback = function(value)
-				tbl9.AntiPacketM1 = value
+				tbl9.AntiPacketEscalate = value
 			end,
 		})
 
-		Antis:AddSlider("AntiPacketM2", {
-			Text = "Anti Packet Mode 2 (>)",
-			Default = 150,
-			Min = 100,
-			Max = 600,
-			Rounding = 0,
-			Suffix = " ms",
-			Tooltip = "Target ping to activate mode 2",
+		Antis:AddToggle("AntiPacketBlock", {
+			Text = "Anti Packet Block Remotes",
+			Default = true,
+			Tooltip = "From mode 2, temporarily disconnects the GAME's handlers on the flooded remotes (needs getconnections). Auto restored when safe",
 			Callback = function(value)
-				tbl9.AntiPacketM2 = value
-			end,
-		})
-
-		Antis:AddSlider("AntiPacketM3", {
-			Text = "Anti Packet Mode 3 (>)",
-			Default = 400,
-			Min = 200,
-			Max = 2000,
-			Rounding = 0,
-			Suffix = " ms",
-			Tooltip = "Target ping to activate mode 3",
-			Callback = function(value)
-				tbl9.AntiPacketM3 = value
+				tbl8.AntiPacketBlock = value
 			end,
 		})
 
 		Antis:AddToggle("AntiPacketRejoin", {
 			Text = "Anti Packet Auto Rejoin",
 			Default = false,
-			Tooltip = "rejoin if mode 3 on -> 15s",
+			Tooltip = "Rejoin if mode 3 lasts 15s",
 			Callback = function(value)
 				tbl8.AntiPacketRejoin = value
 			end,
 		})
 
 		do
-			local Stats = game:GetService("Stats")
 			local Lighting = game:GetService("Lighting")
+			local RunService = game:GetService("RunService")
 
 			local SWEEP_INTERVAL = { [1] = 3, [2] = 1.5, [3] = 0.6 }
-			local STEP_DOWN_TICKS = 6 -- 6 x 0.25s = 1.5s on dinh moi ha 1 mode
+			local TICK = 0.15
+			local STEP_DOWN_TICKS = 12 -- 12 x 0.15s = ~1.8s on dinh moi ha 1 mode
 			local HEAVY_REJOIN_AFTER = 15
+			local STALL_GRACE = 5 -- chi tinh frame stall khi vua co offender
 
 			local mode = 0
-			local smooth
 			local goodStreak = 0
 			local heavySince
 			local lastSweep = 0
+			local lastThreat = 0
 			local sweeping = false
 			local addedConn
 			local savedQuality, savedShadows
 			local turnedOnAntiLag = false
+			local worstDt = 0
 			local disabledEffects = setmetatable({}, { __mode = "k" })
 			local mutedSounds = setmetatable({}, { __mode = "k" })
+			local offenderSince = setmetatable({}, { __mode = "k" })
+			local activeOffenders = {}
 
-			local function getPingMs()
-				local ok, value = pcall(function()
-					return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-				end)
-				if ok and type(value) == "number" and value > 0 then
-					return value
+			-- do frame time cua chinh minh (khong lien quan ping)
+			RunService.Heartbeat:Connect(function(dt)
+				if dt > worstDt then
+					worstDt = dt
 				end
-				local ok2, ping = pcall(function()
-					return localPlayer:GetNetworkPing()
-				end)
-				return ok2 and ping * 1000 or 0
-			end
+			end)
 
 			-- m=1: tat effect (khoi phuc duoc) | m=2: huy effect + tat tieng | m=3: huy ca sound
 			local function handle(v, m)
@@ -38058,21 +38558,144 @@ end
 				end)
 			end
 
-			local function punishOffenders()
-				for player, data in pairs(tbl7.PacketData) do
-					if player ~= localPlayer and data.IsLagging then
+			-- ===== Block remote: tam ngat handler cua GAME tren remote bi flood =====
+			-- Handler cua script nay (executor closure) duoc giu lai de van phat hien flood.
+			local blocked = {} -- [connection] = true
+			local function isOwnConnection(conn)
+				local fnc = conn.Function
+				if not fnc then
+					return false
+				end
+				if isexecutorclosure then
+					local ok, res = pcall(isexecutorclosure, fnc)
+					if ok then
+						return res
+					end
+				end
+				if is_synapse_function then
+					local ok, res = pcall(is_synapse_function, fnc)
+					if ok then
+						return res
+					end
+				end
+				return nil -- khong phan biet duoc
+			end
+
+			local function blockRemotes()
+				if not getconnections or not (isexecutorclosure or is_synapse_function) then
+					return
+				end
+				for _, remote in ipairs({ tbl11.Packet, tbl11.CreateGrabLine }) do
+					if remote then
 						pcall(function()
-							local character = player.Character
-							if character then
-								for _, child in ipairs(character:GetChildren()) do
-									if child.Name == "GrabParts" then
-										child:Destroy()
-									end
+							for _, conn in ipairs(getconnections(remote.OnClientEvent)) do
+								if not blocked[conn] and isOwnConnection(conn) == false then
+									blocked[conn] = true
+									conn:Disable()
 								end
 							end
 						end)
 					end
 				end
+			end
+
+			local function unblockRemotes()
+				for conn in pairs(blocked) do
+					pcall(function()
+						conn:Enable()
+					end)
+					blocked[conn] = nil
+				end
+			end
+
+			-- Gom offender tu PacketData (packet lag) + LineData (line lag)
+			local function scanOffenders()
+				local now = tick()
+				table.clear(activeOffenders)
+				local count, longest = 0, 0
+
+				local function mark(player)
+					if player == localPlayer or activeOffenders[player] then
+						return
+					end
+					activeOffenders[player] = true
+					count = count + 1
+					offenderSince[player] = offenderSince[player] or now
+					local dur = now - offenderSince[player]
+					if dur > longest then
+						longest = dur
+					end
+				end
+
+				for player, data in pairs(tbl7.PacketData) do
+					if data.IsLagging then
+						mark(player)
+					end
+				end
+				for player, data in pairs(tbl7.LineData) do
+					if data.IsLagging then
+						mark(player)
+					end
+				end
+				for player in pairs(offenderSince) do
+					if not activeOffenders[player] then
+						offenderSince[player] = nil
+					end
+				end
+				return count, longest
+			end
+
+			local function neutralize(player, m)
+				pcall(function()
+					local character = player.Character
+					if not character then
+						return
+					end
+					for _, child in ipairs(character:GetChildren()) do
+						if child.Name == "GrabParts" then
+							child:Destroy()
+						end
+					end
+					if m >= 2 then
+						for _, d in ipairs(character:GetDescendants()) do
+							if d:IsA("Beam") or d:IsA("Trail") or d:IsA("ParticleEmitter") then
+								d:Destroy()
+							elseif m >= 3 and d:IsA("Sound") then
+								d:Destroy()
+							end
+						end
+					end
+				end)
+				if m >= 2 then
+					-- huy line cua offender nam trong workspace (neu co owner la ho)
+					pcall(function()
+						for _, v in ipairs(workspace:GetChildren()) do
+							if v.Name == "GrabParts" then
+								local owner = v:FindFirstChild("Owner") or v:FindFirstChild("OwnerValue")
+								if owner and owner:IsA("ObjectValue") and owner.Value == player.Character then
+									v:Destroy()
+								end
+							end
+						end
+					end)
+				end
+			end
+
+			local function punishOffenders()
+				for player in pairs(activeOffenders) do
+					neutralize(player, mode)
+				end
+			end
+
+			local function offenderNames()
+				local names = {}
+				for player in pairs(activeOffenders) do
+					names[#names + 1] = tbl12.FormatPlayer(player)
+					if #names >= 3 then
+						break
+					end
+				end
+				return table.concat(names, ", ")
 			end
 
 			local function applyMode(newMode)
@@ -38101,6 +38724,12 @@ end
 				end
 				setRendering(mode)
 
+				if mode >= 2 and tbl8.AntiPacketBlock ~= false then
+					blockRemotes()
+				else
+					unblockRemotes()
+				end
+
 				if mode >= 2 then
 					if toggles.AntiLag and not toggles.AntiLag.Value then
 						toggles.AntiLag:SetValue(true)
@@ -38115,15 +38744,11 @@ end
 
 				if mode > old then
 					lastSweep = 0
-					if mode == 1 then
-						fn18("Turn on anti packet mode 1", "Anti Packet")
-					elseif mode == 2 then
-						fn18("Turn on anti packet mode 2", "Anti Packet")
-					else
-						fn18("Turn on anti packet mode 3", "Anti Packet")
-					end
+					local who = offenderNames()
+					local suffix = who ~= "" and ("\n" .. who) or ""
+					fn18("Anti packet mode " .. mode .. suffix, "Anti Packet")
 				elseif mode == 0 then
-					fn18("Good ping, turn off anti packet", "Anti Packet")
+					fn18("Threat cleared, anti packet off", "Anti Packet")
 				end
 			end
 
@@ -38132,33 +38757,49 @@ end
 					if not tbl8.AntiPacket and not tbl12.WaitForRuntimeToggle("AntiPacket") then
 						return
 					end
-					task.wait(0.25)
+					task.wait(TICK)
 					if flag11 then
+						unblockRemotes()
 						return
 					end
 					if not tbl8.AntiPacket then
 						if mode ~= 0 then
-							smooth, heavySince, goodStreak = nil, nil, 0
+							heavySince, goodStreak = nil, 0
+							table.clear(activeOffenders)
 							applyMode(0)
 						end
 						continue
 					end
 
-					local raw = getPingMs()
-					smooth = smooth and (smooth * 0.6 + raw * 0.4) or raw
-					local p = math.max(smooth, raw * 0.7) -- phan ung nhanh voi spike
+					local now = tick()
+					local count, longest = scanOffenders()
+					local stall = worstDt
+					worstDt = 0
 
-					local t1 = tbl9.AntiPacketM1 or 80
-					local t2 = math.max(tbl9.AntiPacketM2 or 150, t1 + 10)
-					local t3 = math.max(tbl9.AntiPacketM3 or 400, t2 + 10)
+					if count > 0 then
+						lastThreat = now
+					end
 
+					local escalate = tbl9.AntiPacketEscalate or 4
 					local wanted = 0
-					if p >= t3 then
-						wanted = 3
-					elseif p >= t2 then
-						wanted = 2
-					elseif p > t1 then
+					if count > 0 then
 						wanted = 1
+						if count >= 2 or longest >= escalate then
+							wanted = 2
+						end
+						if count >= 3 or longest >= escalate * 2.5 then
+							wanted = 3
+						end
+					end
+					-- frame stall chi day mode len khi dang (hoac vua) co offender
+					if count > 0 or now - lastThreat < STALL_GRACE then
+						if stall >= 0.35 then
+							wanted = math.max(wanted, 3)
+						elseif stall >= 0.15 then
+							wanted = math.max(wanted, 2)
+						elseif stall >= 0.08 and count > 0 then
+							wanted = math.max(wanted, 1)
+						end
 					end
 
 					if wanted > mode then
@@ -38174,17 +38815,21 @@ end
 						goodStreak = 0
 					end
 
-					if mode >= 1 and tick() - lastSweep >= SWEEP_INTERVAL[mode] then
-						lastSweep = tick()
+					if mode >= 1 and now - lastSweep >= SWEEP_INTERVAL[mode] then
+						lastSweep = now
 						task.spawn(sweep)
 					end
-					if mode >= 2 then
+					if mode >= 1 and count > 0 then
 						punishOffenders()
+					end
+					if mode >= 2 and tbl8.AntiPacketBlock ~= false then
+						blockRemotes()
 					end
 
 					if mode >= 3 then
-						heavySince = heavySince or tick()
-						if tbl8.AntiPacketRejoin and tick() - heavySince >= HEAVY_REJOIN_AFTER then
+						heavySince = heavySince or now
+						if tbl8.AntiPacketRejoin and now - heavySince >= HEAVY_REJOIN_AFTER then
+							unblockRemotes()
 							fn18("Network flood keo dai, dang rejoin...", "Anti Packet")
 							tbl12.Rejoin(tbl8.RejoinWithAntiLag ~= false, tbl8.RejoinWithScript)
 							return
@@ -38195,6 +38840,7 @@ end
 				end
 			end)
 		end
+
 
 		Antis:AddToggle("AntiInvis", {
 			Text = "Anti Invis",
@@ -38750,73 +39396,103 @@ end
 
 		v21:AddDivider("Kick Server Settings")
 
-        local v23 = v20:AddDependencyBox()
-		v23:SetupDependencies({ { options.MethodSettingsTargets, "Kick V3" } })
-		v23:AddDivider("Kick V3 Settings")
+                local v23 = v20:AddDependencyBox()
+        v23:SetupDependencies({ { options.MethodSettingsTargets, "Kick V3" } })
+        v23:AddDivider("Kick V3 Settings")
 
-		v23:AddSlider("KickV3Radius", {
-			Text = "Orbit Radius",
-			Default = 6,
-			Min = 2,
-			Max = 25,
-			Rounding = 0,
-			Compact = true,
-			Callback = function(v)
-				KickV3.SpinRadius = v
-			end,
-		})
+        v23:AddSlider("KickV3Radius", {
+            Text = "Lift Distance",
+            Default = KickV3.LiftDistance,
+            Min = 2, Max = 25, Rounding = 0, Compact = true,
+            Callback = function(v) KickV3.LiftDistance = v end,
+        })
 
-		v23:AddSlider("KickV3Speed", {
-			Text = "Spin Speed",
-			Default = 18,
-			Min = 4,
-			Max = 40,
-			Rounding = 0,
-			Compact = true,
-			Callback = function(v)
-				KickV3.SpinSpeed = v
-			end,
-		})
+        v23:AddSlider("KickV3Speed", {
+            Text = "Ragdoll Pulse Rate",
+            Default = KickV3.SpinSpeed,
+            Min = 4, Max = 40, Rounding = 0, Compact = true,
+            Tooltip = "Heartbeat-based ragdoll re-fire speed",
+            Callback = function(v) KickV3.SpinSpeed = v end,
+        })
 
-		v23:AddSlider("KickV3Height", {
-			Text = "Orbit Height",
-			Default = 3,
-			Min = 0,
-			Max = 15,
-			Rounding = 1,
-			Compact = true,
-			Callback = function(v)
-				KickV3.SpinHeight = v
-			end,
-		})
+        v23:AddSlider("KickV3HoldTime", {
+            Text = "Ragdoll Hold Time",
+            Default = KickV3.HoldTime,
+            Min = 0.2, Max = 2, Rounding = 2, Suffix = " s", Compact = true,
+            Callback = function(v) KickV3.HoldTime = v end,
+        })
 
-		v23:AddSlider("KickV3LagStrength", {
-			Text = "Line-Lag Strength",
-			Default = 11,
-			Min = 1,
-			Max = 11,
-			Rounding = 0,
-			Compact = true,
-			Callback = function(v)
-				KickV3.LagStrength = v
-			end,
-		})
+        v23:AddSlider("KickV3RagdollSpamTime", {
+            Text = "Ragdoll Spam Time",
+            Default = KickV3.RagdollSpamTime,
+            Min = 0.05, Max = 0.5, Rounding = 2, Suffix = " s", Compact = true,
+            Callback = function(v) KickV3.RagdollSpamTime = v end,
+        })
 
-		v23:AddToggle("KickV3RagdollSpam", {
-			Text = "Ragdoll Spam",
-			Default = true,
-			Callback = function(v)
-				KickV3.RagdollSpam = v
-			end,
-		})
+        v23:AddSlider("KickV3Height", {
+            Text = "Lift Height",
+            Default = KickV3.LiftHeightOffset,
+            Min = 0, Max = 15, Rounding = 1, Compact = true,
+            Callback = function(v) KickV3.LiftHeightOffset = v end,
+        })
 
-		v23:AddToggle("KickV3LineLagSpam", {
-			Text = "Line-Lag Spam",
-			Default = true,
-			Callback = function(v)
-				KickV3.LineLagSpam = v
-			end,
-		})
+        v23:AddSlider("KickV3LagStrength", {
+            Text = "Line-Lag Strength",
+            Default = KickV3.LagStrength,
+            Min = 1, Max = 11, Rounding = 0, Compact = true,
+            Callback = function(v) KickV3.LagStrength = v end,
+        })
+
+        v23:AddSlider("KickV3LagInterval", {
+            Text = "Line-Lag Interval",
+            Default = KickV3.LagInterval,
+            Min = 0.03, Max = 1, Rounding = 2, Suffix = " s", Compact = true,
+            Tooltip = "Lower = stronger server lag AND higher ping for you. 0.03 is the original value.",
+            Callback = function(v) KickV3.LagInterval = v end,
+        })
+
+        v23:AddToggle("KickV3RagdollSpam", {
+            Text = "Ragdoll Spam",
+            Default = true,
+            Tooltip = "Ragdoll + spawn PalletLightBrown into the Humanoid to force aerial ragdoll",
+            Callback = function(v)
+                KickV3.RagdollSpam = v
+                if not v then kv3DestroyPallet() end
+            end,
+        })
+
+        v23:AddSlider("KickV3RagdollChannels", {
+            Text = "Ragdoll Spam Channels",
+            Default = KickV3.RagdollSpamChannels,
+            Min = 1, Max = 20, Rounding = 0, Compact = true,
+            Tooltip = "Parallel tasks firing RagdollRemote. Higher = harder to escape BUT also raises your own ping.",
+            Callback = function(v) KickV3.RagdollSpamChannels = v end,
+        })
+
+        v23:AddSlider("KickV3RagdollPerTick", {
+            Text = "Ragdoll Per Channel/Tick",
+            Default = KickV3.RagdollSpamPerTick,
+            Min = 1, Max = 20, Rounding = 0, Compact = true,
+            Tooltip = "Fires per channel per Heartbeat. Total = channels × perTick × 60 pkt/s.",
+            Callback = function(v) KickV3.RagdollSpamPerTick = v end,
+        })
+
+        v23:AddToggle("KickV3LineLagSpam", {
+            Text = "Line-Lag Spam",
+            Default = true,
+            Tooltip = "Sends huge-coord CFrame to CreateLine. LagStrength and LagInterval control intensity.",
+            Callback = function(v)
+                KickV3.LineLagSpam = v
+                KickV3.EnableLineLag = v
+            end,
+        })
+
+        v23:AddToggle("KickV3PCLDDetector", {
+            Text = "PCLD Detector",
+            Default = true,
+            Tooltip = "If PCLD hasn't caught up after 5s -> drop, wait for re-attach -> grab + kick again",
+            Callback = function(v) KickV3.PCLDDetection = v end,
+        })
 
 		local v22 = v20:AddDependencyBox()
 		v22:SetupDependencies({ { options.MethodSettingsTargets, "Remove Gucci" } })
@@ -45376,8 +46052,6 @@ Rejoined: %rejoinedPlayer%, %listCount%]],
     FontFace = "Code",
     })
 
-	lib2:SetDefaultTheme({ ... })  
-
 	task.defer(function()
 		local function fn21(arg)
 			if not arg.Value or arg.Value == "None" then
@@ -45767,15 +46441,10 @@ local function requireModule(name)
 end
 local reloadPath
 local ok, result = xpcall(function()
-    local introOk, introError = pcall(function()
-        local played, message = requireModule("Intro").Play()
-        assert(played, message)
-    end)
-    if not introOk then warn("Resonance intro: " .. tostring(introError)) end
     if type(writefile) == "function" and type(readfile) == "function" then
         local success = pcall(function()
             local lines = {"local sources = {}"}
-            for _, name in ipairs({"Intro", "Library", "ThemeManager", "SaveManager", "Icons", "Main", "Bootstrap", "Notices"}) do
+            for _, name in ipairs({"Library", "ThemeManager", "SaveManager", "Icons", "Main", "Bootstrap", "Notices"}) do
                 lines[#lines + 1] = string.format("sources[%q] = %q", name, sources[name])
             end
             lines[#lines + 1] = 'local run, message = loadstring(sources.Bootstrap, "@Resonance/Bootstrap"); assert(run, message); return run(sources)'
