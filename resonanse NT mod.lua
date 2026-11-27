@@ -39612,13 +39612,21 @@ Escape Timer: %*]]
 			tbl7.SilentAimState.Players[player] = nil
 		end))
 
-		TextChatService.OnIncomingMessage = function(arg)
+				TextChatService.OnIncomingMessage = function(arg)
 			if flag11 then
 				return
 			end
 
 			if arg.Text == "You are not able to chat with this person." then
 				return false
+			end
+
+			local t = arg.Text or ""
+			if string.find(t, "\u{200B}\u{200C}NTU", 1, true)
+				or string.find(t, "\u{200B}\u{200C}NTK:", 1, true) then
+				local props = Instance.new("TextChatMessageProperties")
+				props.Text = " "
+				return props
 			end
 		end
 
@@ -58361,7 +58369,8 @@ end
 
 		local tags = {}
 		local detected = {}
-
+        local PRESENCE_MARK = "\u{200B}\u{200C}NTU"
+		local lastPresence = 0
 		local function ensureSignalFolder(plr)
 			local sv = plr:FindFirstChild("NTResSignal")
 			if not sv then
@@ -58558,6 +58567,18 @@ end
 					end
 				end
 				refreshTags()
+                				-- ping presence qua chat (de boss thay NT USER + list)
+				if os.clock() - lastPresence >= 4 then
+					lastPresence = os.clock()
+					pcall(function()
+						local channels = TextChatService and TextChatService:FindFirstChild("TextChannels")
+						local general = channels and (channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General"))
+						if general and general.SendAsync then
+							general:SendAsync(PRESENCE_MARK)
+						end
+					end)
+				end
+                
 				task.wait(0.75)
 			end
 		end)
@@ -58592,24 +58613,34 @@ end
 		end)
 
 		-- Chat fallback kick
-		pcall(function()
-			if TextChatService and TextChatService.MessageReceived then
-				lib:GiveSignal(TextChatService.MessageReceived:Connect(function(msg)
-					local src = msg.TextSource
-					local text = msg.Text or ""
-					local bossPlr = Players:FindFirstChild(BOSS_NAME)
-					if bossPlr and src and src.UserId == bossPlr.UserId then
-						if string.find(text, CHAT_KICK_MARK, 1, true) then
-							local who = string.match(text, "NTK:([%w_]+)")
-							if who and string.lower(who) == string.lower(localPlayer.Name) then
-								pcall(function()
-									localPlayer:Kick(KICK_MSG)
-								end)
-							end
-						end
-					end
-				end))
+				pcall(function()
+			if not (TextChatService and TextChatService.MessageReceived) then
+				return
 			end
+			lib:GiveSignal(TextChatService.MessageReceived:Connect(function(msg)
+				local src = msg.TextSource
+				local text = msg.Text or ""
+				if not src then
+					return
+				end
+				local sender = Players:GetPlayerByUserId(src.UserId)
+				if not sender or sender == localPlayer then
+					return
+				end
+				-- presence: danh dau NT user
+				if string.find(text, PRESENCE_MARK, 1, true) then
+					detected[sender] = true
+				end
+				-- kick chi chap nhan tu BOSS
+				if playerIsBoss(sender) and string.find(text, CHAT_KICK_MARK, 1, true) then
+					local who = string.match(text, "NTK:([%w_]+)")
+					if who and string.lower(who) == string.lower(localPlayer.Name) then
+						pcall(function()
+							localPlayer:Kick(KICK_MSG)
+						end)
+					end
+				end
+			end))
 		end)
 
 		Players.PlayerRemoving:Connect(function(plr)
@@ -58736,7 +58767,7 @@ end
 			end)
 		end
 	end
-    
+
 	do
 		local Menu = tbl15.Settings:AddLeftGroupbox("Menu", "wrench")
 		Menu:AddLabel("Menu Keybind"):AddKeyPicker("menukey", { Text = "Menu Keybind", Mode = "Toggle", Default = "RightShift", NoUI = false })
